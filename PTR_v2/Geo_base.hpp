@@ -3,6 +3,19 @@
 2. 基于 Coor 衍生出的运算符重载
 */
 
+#include <climits>
+#include <ostream>
+#include <exception>
+#include <cmath>
+
+typedef std::exception NullPtrException;
+
+inline bool equal(const double a, const double b)
+{
+	#define EPS 1e-9
+	return fabs(a-b)<EPS ? true : false;
+}
+
 /// @brief Template class Coor
 /// @tparam coor_t 
 template <typename coor_t>
@@ -33,7 +46,7 @@ public:
 	Coor& operator-= (const Coor<coor_t>& right);
 	Coor& operator+= (const Coor<coor_t>& right);
     Coor& operator+= (const coor_t& value);
-	Coor& operator-= (const coor_t& value)
+	Coor& operator-= (const coor_t& value);
 };
 
 template <typename coor_t>
