@@ -8,13 +8,11 @@
 #include <exception>
 #include <cmath>
 
-typedef std::exception NullPtrException;
+#include <iostream>
 
-inline bool equal(const double a, const double b)
-{
-	#define EPS 1e-9
-	return fabs(a-b)<EPS ? true : false;
-}
+#define log 0
+
+typedef std::exception NullPtrException;
 
 /// @brief Template class Coor
 /// @tparam coor_t 
@@ -28,8 +26,8 @@ public:
 	static const int INF = INT_MAX;
 	static const int NINF = INT_MIN;
 
-	explicit Coor(coor_t a=0, coor_t b=0) : x(a), y(b) {} //! 查
-	Coor(const Coor<coor_t>& rhs) : x(rhs.x), y(rhs.y) {} //! 查
+	explicit Coor(coor_t a=0, coor_t b=0) : x(a), y(b) {}
+	Coor(const Coor<coor_t>& rhs) : x(rhs.x), y(rhs.y) {}
 	virtual ~Coor() {}
 
 	// setter
@@ -50,7 +48,7 @@ public:
 };
 
 template <typename coor_t>
-void Coor<coor_t>::set(coor_t a=0, coor_t b=0) { x = a, y = b; }
+void Coor<coor_t>::set(coor_t a, coor_t b ) { x = a, y = b; }
 
 template <typename coor_t>
 void Coor<coor_t>::setX(coor_t new_x) { x = new_x; }
@@ -103,13 +101,34 @@ Coor<coor_t>& Coor<coor_t>::operator-= (const coor_t& value)
 }
 
 /*************** operator overloading for Coor *********************/
-//! 注意函数参数里的引用与连续引用
+
+/** overload stream operator for Coor **/
+template <typename coor_t>
+std::ostream& operator<< (std::ostream &out, const Coor<coor_t> &coor)
+{
+#if log
+	std::cout << "You are using the operator<< overload" << std::endl;
+#endif
+	out << '(';
+	if(coor.getX() == Coor<coor_t>::INF) out << "inf";
+	else if(coor.getX() == Coor<coor_t>::NINF) out << "-inf";
+	else out << coor.getX();
+	out << ", ";
+	if(coor.getY() == Coor<coor_t>::INF) out << "inf";
+	else if(coor.getY() == Coor<coor_t>::NINF) out << "-inf";
+	else out << coor.getY();
+	out << ')';
+	return out;
+}
 
 template <typename coor_t>
 inline Coor<coor_t> operator- (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 {
+#if log
+	std::cout << "You are using the operator- overload" << std::endl;
+#endif
 	Coor<coor_t> temp(lhs);
-	temp -= rhs;//? 调用的模版类 Coor 里的运算符
+	temp -= rhs;
 	return temp;
 }
 
@@ -117,6 +136,9 @@ inline Coor<coor_t> operator- (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 template <typename coor_t>
 inline Coor<coor_t> operator+ (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 {
+#if log
+	std::cout << "You are using the operator+ overload" << std::endl;
+#endif
 	Coor<coor_t> temp(lhs);
 	temp += rhs;
 	return temp;
@@ -126,6 +148,9 @@ inline Coor<coor_t> operator+ (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 template <typename coor_t>
 inline Coor<coor_t> operator- (Coor<coor_t>&& lhs, const Coor<coor_t>& rhs)
 {
+#if log
+	std::cout << "You area using the operator- overload with rvalue reference" << std::endl;
+#endif
 	lhs -= rhs;
 	return lhs;
 }
@@ -134,6 +159,9 @@ inline Coor<coor_t> operator- (Coor<coor_t>&& lhs, const Coor<coor_t>& rhs)
 template <typename coor_t>
 inline Coor<coor_t> operator+ (Coor<coor_t>&& lhs, const Coor<coor_t>& rhs)
 {
+#if log
+	std::cout << "You area using the operator+ overload with rvalue reference" << std::endl;
+#endif
 	lhs += rhs;
 	return lhs;
 }
@@ -141,16 +169,21 @@ inline Coor<coor_t> operator+ (Coor<coor_t>&& lhs, const Coor<coor_t>& rhs)
 
 template <typename coor_t>
 inline Coor<coor_t> operator- (const Coor<coor_t>& lhs, const coor_t& val)
-{
+{	
+#if log
+	std::cout << "You are using the operator- overload with scalar value" << std::endl;
+#endif
 	Coor<coor_t> temp(lhs);
 	temp -= val;
 	return temp;
 }
 
-
 template <typename coor_t>
 inline Coor<coor_t> operator+ (const Coor<coor_t>& lhs, const coor_t& val)
-{
+{	
+#if log
+	std::cout << "You are using the operator+ overload with scalar value" << std::endl;
+#endif
 	Coor<coor_t> temp(lhs);
 	temp += val;
 	return temp;
@@ -159,7 +192,10 @@ inline Coor<coor_t> operator+ (const Coor<coor_t>& lhs, const coor_t& val)
 
 template <typename coor_t>
 inline Coor<coor_t> operator- (Coor<coor_t>&& lhs, const coor_t& rhs)
-{
+{	
+#if log
+	std::cout << "You are using the operator- overload with scalar value and rvalue reference" << std::endl;
+#endif
 	lhs -= rhs;
 	return lhs;
 }
@@ -167,7 +203,10 @@ inline Coor<coor_t> operator- (Coor<coor_t>&& lhs, const coor_t& rhs)
 
 template <typename coor_t>
 inline Coor<coor_t> operator+ (Coor<coor_t>&& lhs, const coor_t& rhs)
-{
+{	
+#if log
+	std::cout << "You are using the operator+ overload with scalar value and rvalue reference" << std::endl;
+#endif
 	lhs += rhs;
 	return lhs;
 }
@@ -176,6 +215,9 @@ inline Coor<coor_t> operator+ (Coor<coor_t>&& lhs, const coor_t& rhs)
 template <typename coor_t>
 inline bool operator< (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 {
+#if log
+	std::cout << "You are using the operator< overload" << std::endl;
+#endif
     return ((lhs.getX() < rhs.getX()) && (lhs.getY() < rhs.getY()));
 }
 
@@ -183,6 +225,10 @@ inline bool operator< (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 template <typename coor_t>
 inline bool operator> (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 {
+#if log
+	std::cout << "You are using the operator> overload" << std::endl;
+#endif 
+
     return ((lhs.getX() > rhs.getX()) && (lhs.getY() > rhs.getY()));
 }
 
@@ -190,6 +236,10 @@ inline bool operator> (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 template <typename coor_t>
 inline bool operator== (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 {
+#if log
+	std::cout << "You are using the operator== overload" << std::endl;
+#endif
+
 	if(lhs.getX() != rhs.getX()) { return false; }
 	if(lhs.getY() != rhs.getY()) { return false; }
 	return true;
@@ -199,12 +249,21 @@ inline bool operator== (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 template <typename coor_t>
 inline bool operator!= (const Coor<coor_t>& lhs, const Coor<coor_t>& rhs)
 {
+#if log
+	std::cout << "You are using the operator!= overload" << std::endl;
+#endif
 	if(lhs == rhs) return false;
 	return true;
 }
 
-
 /** specialization version of overloaded operators of Coor **/
+
+inline bool equal(const double a, const double b)
+{
+	#define EPS 1e-9
+	return fabs(a-b)<EPS ? true : false;
+}
+
 template <>
 inline bool operator< (const Coor<double>& lhs, const Coor<double>& rhs)
 {
@@ -230,21 +289,4 @@ inline bool operator== (const Coor<double>& lhs, const Coor<double>& rhs)
 	if(!equal(lhs.getX(), rhs.getX())) { return false; }
 	if(!equal(lhs.getY(), rhs.getY())) { return false; }
 	return true;
-}
-
-
-/** overload stream operator for Coor **/
-template <typename coor_t>
-std::ostream& operator<< (std::ostream &out, const Coor<coor_t> &coor)
-{
-	out << '(';
-	if(coor.getX() == Coor<coor_t>::INF) out << "inf";
-	else if(coor.getX() == Coor<coor_t>::NINF) out << "-inf";
-	else out << coor.getX();
-	out << ", ";
-	if(coor.getY() == Coor<coor_t>::INF) out << "inf";
-	else if(coor.getY() == Coor<coor_t>::NINF) out << "-inf";
-	else out << coor.getY();
-	out << ')';
-	return out;
 }
