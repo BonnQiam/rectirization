@@ -1,11 +1,21 @@
-#include "Coor.hpp"
 #include <iostream>
+#include "PTR.hpp"
+#include "I-PTR.hpp"
 
-void Test_Coor();   // Test Coor class and operators overloading
+#define PTR_test        1
+#define I_PTR_test      1
+
+void Test_Coor();           // Test Coor class and operators overloading
+void Test_PTR();            // Test PTR algorithm
+
+void Test_PTR_Fail_case();  // Test PTR algorithm with fail case
 
 int main(){
 
-    Test_Coor();
+//    Test_Coor();
+//    Test_PTR();
+
+    Test_PTR_Fail_case();
 
     return 0;
 }
@@ -47,7 +57,67 @@ void Test_Coor(){
 
     // Example 8: Subtraction of Coor object with scalar value and rvalue reference
     Coor<int> result_sub_scalar_rvalue = std::move(a) - 2;  // Calls the operator- overload with scalar value and rvalue reference
-    std::cout << "Result of subtraction with scalar value and rvalue reference: " << result_sub_scalar_rvalue << std::endl;
+    std::cout << "Result of subtraction with scalar value and rvalue reference: " << result_sub_scalar_rvalue << std::endl;    
+}
 
-    
+void Test_PTR()
+{
+    std::vector< Coor<int> > polygon;
+    std::vector< Rect<int> > result;
+
+    polygon.emplace_back(1, 1);
+    polygon.emplace_back(3, 1);
+    polygon.emplace_back(3, 3);
+    polygon.emplace_back(4, 3);
+    polygon.emplace_back(4, 1);
+    polygon.emplace_back(5, 1);
+    polygon.emplace_back(5, 5);
+    polygon.emplace_back(4, 5);
+    polygon.emplace_back(4, 4);
+    polygon.emplace_back(2, 4);
+    polygon.emplace_back(2, 2);
+    polygon.emplace_back(1, 2);
+
+    PTR(polygon.cbegin(), polygon.cend(), result);
+
+    std::cout << "rectangle list:\n";
+    for (const auto& rect : result) {
+        std::cout << "\t<" << rect.getBL() << " - " << rect.getTR() << ">\n";
+    }
+}
+
+void Test_PTR_Fail_case()
+{
+    std::vector< Coor<int> > polygon;
+    std::vector< Rect<int> > result;
+
+    polygon.emplace_back(1, 1);
+    polygon.emplace_back(1, 1);
+    polygon.emplace_back(1, 1);
+    polygon.emplace_back(1, 1);
+    polygon.emplace_back(3, 1);
+    polygon.emplace_back(3, 3);
+    polygon.emplace_back(4, 3);
+    polygon.emplace_back(4, 1);
+    polygon.emplace_back(5, 1);
+    polygon.emplace_back(5, 5);
+    polygon.emplace_back(4, 5);
+    polygon.emplace_back(4, 4);
+    polygon.emplace_back(2, 4);
+    polygon.emplace_back(2, 2);
+    polygon.emplace_back(1, 2);
+    polygon.emplace_back(1, 1);
+
+#if I_PTR_test
+    I_PTR(polygon.cbegin(), polygon.cend(), result);
+#endif
+
+/*
+    PTR(polygon.cbegin(), polygon.cend(), result);
+
+    std::cout << "rectangle list:\n";
+    for (const auto& rect : result) {
+        std::cout << "\t<" << rect.getBL() << " - " << rect.getTR() << ">\n";
+    }
+*/
 }

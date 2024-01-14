@@ -1,3 +1,6 @@
+#ifndef Rectangle_hpp
+#define Rectangle_hpp
+
 #include "Coor.hpp"
 
 /***********************************************
@@ -144,3 +147,4 @@ void Rect<T>::shiftY(const T val)
     tr.addToY(val);
 }
 
+#endif
