@@ -2,7 +2,7 @@
 #include "PTR.hpp"
 #include "I-PTR.hpp"
 
-#define PTR_test        1
+#define PTR_test        0
 #define I_PTR_test      1
 
 void Test_Coor();           // Test Coor class and operators overloading
@@ -92,32 +92,33 @@ void Test_PTR_Fail_case()
     std::vector< Rect<int> > result;
 
     polygon.emplace_back(1, 1);
-    polygon.emplace_back(1, 1);
-    polygon.emplace_back(1, 1);
-    polygon.emplace_back(1, 1);
-    polygon.emplace_back(3, 1);
-    polygon.emplace_back(3, 3);
-    polygon.emplace_back(4, 3);
     polygon.emplace_back(4, 1);
-    polygon.emplace_back(5, 1);
-    polygon.emplace_back(5, 5);
-    polygon.emplace_back(4, 5);
+    polygon.emplace_back(4, 2);
+    polygon.emplace_back(5, 2);
+    polygon.emplace_back(5, 3);
+    polygon.emplace_back(4, 3);
     polygon.emplace_back(4, 4);
+    polygon.emplace_back(3, 4);
+    polygon.emplace_back(3, 3);
+    polygon.emplace_back(2, 3);
     polygon.emplace_back(2, 4);
-    polygon.emplace_back(2, 2);
-    polygon.emplace_back(1, 2);
-    polygon.emplace_back(1, 1);
+    polygon.emplace_back(1, 4);
 
 #if I_PTR_test
+    std::cout << "I_PTR Algorithm Result:\n" << std::endl;
     I_PTR(polygon.cbegin(), polygon.cend(), result);
-#endif
-
-/*
-    PTR(polygon.cbegin(), polygon.cend(), result);
-
     std::cout << "rectangle list:\n";
     for (const auto& rect : result) {
         std::cout << "\t<" << rect.getBL() << " - " << rect.getTR() << ">\n";
     }
-*/
+#endif
+
+#if PTR_test
+    std::cout << "PTR Algorithm Result:\n" << std::endl;
+    PTR(polygon.cbegin(), polygon.cend(), result);
+    std::cout << "rectangle list:\n";
+    for (const auto& rect : result) {
+        std::cout << "\t<" << rect.getBL() << " - " << rect.getTR() << ">\n";
+    }
+#endif
 }
