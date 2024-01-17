@@ -20,7 +20,7 @@ private:
     void resetWH();
 public:
     Rect(const T x=T(), const T y=T(), const T w=T(), const T h=T()) : bl(x, y), tr(x+w, y+h), width(w), height(h) {}
-    Rect(const Coor<T>& nbl, const Coor<T>& ntr) : bl(nbl), tr(ntr) { resetWH(); }
+    Rect(const Coor<T>& nbl, const Coor<T>& ntr) : bl(nbl), tr(ntr) { resetWH();}
 
     inline const Coor<T>& getBL() const { return bl; }
     inline const Coor<T>& getTR() const { return tr; }
@@ -53,7 +53,6 @@ void Rect<T>::resetWH()
     width  = tr.getX() - bl.getX();
     height = tr.getY() - bl.getY();
 }
-
 
 template <typename T>
 void Rect<T>::setBL(const T x, const T y)
@@ -95,14 +94,12 @@ template <typename T>
 void Rect<T>::setW(const T w, const T h)
 {
     width = w;
-    tr.setX(bl.getX() + w);
 }
 
 template <typename T>
 void Rect<T>::setH(const T w, const T h)
 {
     height = h;
-    tr.setY(bl.getY() + h);
 }
 
 template <typename T>

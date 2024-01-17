@@ -5,6 +5,8 @@
 #include <tuple>
 #include <algorithm>
 
+#define debug_IPTR 1
+
 template <typename T>
 static auto findCoorTuple__4_I_PTR(std::list< Coor<T> >& polygon) 
     -> std::tuple<typename std::list< Coor<T> >::iterator, 
@@ -38,9 +40,11 @@ void I_PTR(const const_iterator& first, const const_iterator& last,
         updatePolygon_4_I_PTR(polygon, Pk, Pl, Pm);
     }
 #endif
+#if debug_IPTR
+    for(int i=0; i<9; ++i){
+        std::cout << "polygon before: " << std::endl;
+        for (const auto& i : polygon) { std::cout << i << " " << std::endl; }
 
-#if 1
-    for(int i=0; i<4; ++i){
         const auto& coor_tuple = findCoorTuple_4_I_PTR(polygon);
 
         const auto Pk = *(std::get<0>(coor_tuple));
@@ -58,7 +62,7 @@ void I_PTR(const const_iterator& first, const const_iterator& last,
 
         updatePolygon_4_I_PTR(polygon, Pk, Pl, Pm);
 
-        std::cout << "polygon: " << std::endl;
+        std::cout << "polygon after: " << std::endl;
         for (const auto& i : polygon) { std::cout << i << " " << std::endl; }
 
         std::cout << "===============================================" << std::endl;
@@ -85,11 +89,25 @@ static auto findCoorTuple_4_I_PTR(std::list< Coor<T> >& polygon)
 
     // find Pk: the bottom and the left-most coordinate
     typename std::list < Coor<T> >::iterator Pk = polygon.begin();
-    // remove the duplicate elements of Pk, Pk will conserve still as the first element
+
+    // check if there are duplicate elements in polygon
+    bool duplicate_flag = false;
+    for (auto iter = polygon.begin(); iter != polygon.end(); ++iter) {
+        if (iter != Pk && (*iter == *Pk)) {
+            duplicate_flag = true;
+            polygon.erase(iter);
+        }
+    }
+    if(duplicate_flag)
+        polygon.erase(Pk);
+
+    /*
+    remove the duplicate elements of Pk, Pk will conserve still as the first element
     polygon.unique([&Pk](const auto& lhs, const auto& rhs) -> bool {
             return (lhs == rhs && lhs == *Pk);
         }
     );
+    */
 
     // find Pl: the bottom and the left-most coordinate except Pk
     const auto Pl = std::min_element(polygon.begin(), polygon.end(), 
@@ -146,36 +164,70 @@ static void updatePolygon_4_I_PTR(std::list< Coor<T> >& polygon,
     auto iter = polygon.begin();
     const Coor<T> upl(Pk.getX(), Pm.getY()), upr(Pl.getX(), Pm.getY());
 
-    bool insert_upl = true ,insert_upr, insert_more_upr = true;
+    bool insert_upl = true, insert_upr = true;
+    int  flag_Pk = 1, flag_Pl = 1, flag_upl = 1, flag_upr = 1;
 
-    //! 待修正
     while (iter != polygon.end()) {
-        if (*iter == Pk)        { iter = polygon.erase(iter); }
-        else if (*iter == Pl)   { iter = polygon.erase(iter); }
-        else if (*iter == upl)  { iter = polygon.erase(iter); insert_upl = false; }
-        else if (*iter == upr)  { iter = polygon.erase(iter); insert_upr = false; }
-        else                    { ++iter; }
+        if ( flag_Pk && (*iter == Pk) ) { 
+            iter = polygon.erase(iter); 
+            flag_Pk = 0;
+        }
+        else if ( flag_Pl && (*iter == Pl) ) { 
+            iter = polygon.erase(iter); 
+            flag_Pl = 0;
+        }
+        else if ( flag_upl && (*iter == upl) ) { 
+            iter = polygon.erase(iter); 
+            flag_upl = 0;
+            insert_upl = false;
+        }
+        else if ( flag_upr && (*iter == upr) ) { 
+            iter = polygon.erase(iter); 
+            flag_upr = 0;
+            insert_upr = false;
+        }
+        else { 
+            ++iter; 
+        }
     }
 
     // Check Fig 7-d situation
+    bool empty_ur_dl = true; // point out that no points in polygon : (iter->getX() < upr.getX() && iter->getY() < upr.getY()) or (iter->getX() > upr.getX() && iter->getY() > upr.getY())
+    bool exit_dr = false; // point out that exits at least one point in polygon : (iter->getX() > upr.getX() && iter->getY() < upr.getY())
+    bool exit_Ul = false; // point out that exits at least one point in polygon : (iter->getX() < upr.getX() && iter->getY() > upr.getY())
     iter = polygon.begin();
     if(!insert_upr) {
-        // check no points in polygon : (iter->getX() < upr.getX() && iter->getY() < upr.getY()) or (iter->getX() > upr.getX() && iter->getY() > upr.getY())
         while (iter != polygon.end()) {
             if ( (iter->getX() < upr.getX() && iter->getY() < upr.getY()) ||
                 (iter->getX() > upr.getX() && iter->getY() > upr.getY()) ) {
-                insert_more_upr = false;
+                empty_ur_dl = false;
                 break;
             }
+
+            if (iter->getX() > upr.getX() && iter->getY() < upr.getY()) {
+                exit_dr = true;
+            }
+
+            if (iter->getX() < upr.getX() && iter->getY() > upr.getY()) {
+                exit_Ul = true;
+            }
+
             ++iter;
         }
     }
 
+    bool insert_more_upr = empty_ur_dl && exit_dr && exit_Ul;
+
+#if debug_IPTR
     std::cout << "insert_upl: " << insert_upl << std::endl;
     std::cout << "insert_upr: " << insert_upr << std::endl;
-    std::cout << "insert_more_upl: " << insert_more_upr << std::endl;
 
+    std::cout << "empty_ur_dl: " << empty_ur_dl << std::endl;
+    std::cout << "exit_dr: " << exit_dr << std::endl;
+    std::cout << "exit_Ul: " << exit_Ul << std::endl;
+    std::cout << "insert_more_upr: " << insert_more_upr << std::endl;
+#endif
     if (insert_upl)      { polygon.emplace_back(upl); }
     if (insert_upr)      { polygon.emplace_back(upr); }
-    if (insert_more_upr) { polygon.emplace_back(upr); polygon.emplace_back(upr); }
+    if (insert_more_upr) { polygon.emplace_back(upr); polygon.emplace_back(upr);}
 }

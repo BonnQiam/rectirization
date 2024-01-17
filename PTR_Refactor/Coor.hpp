@@ -3,6 +3,9 @@
 2. 基于 Coor 衍生出的运算符重载
 */
 
+#ifndef Coor_hpp
+#define Coor_hpp
+
 #include <climits>
 #include <ostream>
 #include <exception>
@@ -290,3 +293,5 @@ inline bool operator== (const Coor<double>& lhs, const Coor<double>& rhs)
 	if(!equal(lhs.getY(), rhs.getY())) { return false; }
 	return true;
 }
+
+#endif
