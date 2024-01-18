@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Polygon.hpp"
+#include "Decomposition.hpp"
 
 void test_Polygon();
 void test_Polygon_shrink();
@@ -8,8 +8,8 @@ void test_Edge_list_complement();
 int main(){
 
 //    test_Polygon();
-    test_Polygon_shrink();
-//    test_Edge_list_complement();
+//    test_Polygon_shrink();
+    test_Edge_list_complement();
 
     return 0;
 }
@@ -142,10 +142,4 @@ void test_Edge_list_complement()
     Polygon<int> poly_complement;
 
     Edge_list_complement(poly, rect, poly_complement);
-/*
-    std::cout << "vertex in polygon after complement: " << std::endl;
-    for(auto v : poly_complement.vertexes){
-        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
-    }
-*/
 }

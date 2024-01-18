@@ -121,8 +121,20 @@ void Polygon_shrink(Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
             T v_NewX  = e_nxt->Coor_pair.second.getX();
             if(e_X*e_nxt_X < 0){
                 if( v_NewX == e->Coor_pair.first.getX() ){
-                    polygon_shrink.vertexes.erase(v);
-                    polygon_shrink.vertexes.erase(v);
+                    if((e+1) == polygon.edges.end()){
+                        polygon_shrink.vertexes.erase(v);
+                        polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
+                        break;
+                    }
+                    else{
+                        polygon_shrink.vertexes.erase(v);
+                        polygon_shrink.vertexes.erase(v);
+
+                        e = e+1;
+                        if(e == (polygon.edges.end()-1))
+                            break;
+                        continue;
+                    }
                 }
                 else{
                     if((e+1) == polygon.edges.end()){
@@ -133,9 +145,14 @@ void Polygon_shrink(Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
                     }
                     else{
                         polygon_shrink.vertexes.erase(v);
+                        e = e+1;
+                        v = v+1;
+                        if(e == (polygon.edges.end()-1))
+                            break;
+                        continue;
                     }
                 }
-                e = e+1; 
+                
             }
         }
         // e and e_nxt area vertical edges
@@ -148,29 +165,39 @@ void Polygon_shrink(Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
 
             if(e_Y*e_nxt_Y < 0){
                 if(v_NewY == e->Coor_pair.first.getY()){
-                    polygon_shrink.vertexes.erase(v);
-                    polygon_shrink.vertexes.erase(v);
-                }
-                else{
-//                    std::cout << "Case 2-Y" << std::endl;
-                    if( (e+1) == polygon.edges.end() ){
-                        *polygon_shrink.vertexes.end() = *(polygon_shrink.vertexes.begin()+1);
+                    if((e+1) == polygon.edges.end()){
+                        polygon_shrink.vertexes.erase(v);
                         polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
-
                         break;
                     }
                     else{
-//                        std::cout << "v is " << *v << std::endl;
                         polygon_shrink.vertexes.erase(v);
-//                        std::cout << "v is " << *v << std::endl;
+                        polygon_shrink.vertexes.erase(v);
+                        
+                        e = e+1;
+                        if(e == (polygon.edges.end()-1))
+                            break;
+                        continue;
                     }
-
                 }
-                e = e+1;
+                else{
+                    if( (e+1) == polygon.edges.end() ){
+                        *(polygon_shrink.vertexes.end()-1) = *(polygon_shrink.vertexes.begin()+1);
+                        polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
+                        break;
+                    }
+                    else{
+                        polygon_shrink.vertexes.erase(v);
+                        e = e+1;
+                        v = v+1;
+                        if(e == (polygon.edges.end()-1))
+                            break;
+                        continue;
+                    }
+                }
             }
         }
-
-        v = v+1;
+        v=v+1;
 
         if( (e+1) == polygon.edges.end() )
             break;
@@ -194,10 +221,10 @@ void Edge_list_complement(
     Coor<T> Upr = rectangle.vertexes[2];
     Coor<T> Upl = rectangle.vertexes[3];
 
-    std::cout << "Pk is " << Pk << std::endl;
-    std::cout << "Pl is " << Pl << std::endl;
-    std::cout << "Upr is " << Upr << std::endl;
-    std::cout << "Upl is " << Upl << std::endl;
+//    std::cout << "Pk is " << Pk << std::endl;
+//    std::cout << "Pl is " << Pl << std::endl;
+//    std::cout << "Upr is " << Upr << std::endl;
+//    std::cout << "Upl is " << Upl << std::endl;
 
     // find Pi->Pk, Pk -> Pl, Pl->Pj edges in polygon
     auto itr_kl = polygon.edges.begin();
@@ -215,17 +242,17 @@ void Edge_list_complement(
     }
 
     if(itr_kl == polygon.edges.begin()){
-        std::cout << "Case 1:" << std::endl;
+//        std::cout << "Case 1:" << std::endl;
         edge_ik = *(polygon.edges.end()-1);
         edge_lj = *(polygon.edges.begin()+1);
     }
     else if(itr_kl == polygon.edges.end()-1){
-        std::cout << "Case 2:" << std::endl;
+//        std::cout << "Case 2:" << std::endl;
         edge_ik = *(polygon.edges.end()-2);
         edge_lj = *(polygon.edges.begin());
     }
     else{
-        std::cout << "Case 3:" << std::endl;
+//        std::cout << "Case 3:" << std::endl;
         edge_ik = *(itr_kl - 1);
         edge_lj = *(itr_kl + 1);
     }
