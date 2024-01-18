@@ -13,7 +13,7 @@
 template <typename T>
 struct Rect
 {
-private:
+private:/*****/
     Coor<T> bl, tr;
     T width, height;
 
