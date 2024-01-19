@@ -48,9 +48,8 @@ struct Polygon
 
     void edges_init(); // according to vertexes, initialize edges
     void vertexes_init(); // according to edges, initialize vertexes
+    bool isInside(Coor<T> point); // check if the point is inside the polygon based on the Winding Number Algorithm
 
-    void find_edges(const Coor<T> vertex, std::vector<edge<T>> &edges_list);
-    void find_edges(const typename std::vector<Coor<T>>::iterator vertex, std::vector<edge<T>> &edges_list);
 };
 
 template <typename T>
@@ -75,26 +74,28 @@ void Polygon<T>::vertexes_init()
 }
 
 template <typename T>
-void Polygon<T>::find_edges(const Coor<T> vertex, std::vector<edge<T>> &edges_list)
+bool Polygon<T>::isInside(Coor<T> point)
 {
-    auto edge = edges.begin();
-    for(; edge != edges.end(); edge++){
-        if(edge->Coor_pair.first == vertex || edge->Coor_pair.second == vertex){
-            edges_list.push_back(*edge);
+    int windingNumber = 0;
+
+    for(int i=0; i<vertexes.size()-1; i++){
+        if(vertexes[i].getY() <= point.getY()){
+            if(vertexes[(i+1) % vertexes.size()].getY() > point.getY()){
+                if(isLeft(vertexes[i], vertexes[(i+1) % vertexes.size()], point) > 0)
+                    windingNumber++;
+            }
+        }
+        else{
+            if(vertexes[(i+1) % vertexes.size()].getY() <= point.getY()){
+                if(isLeft(vertexes[i], vertexes[(i+1) % vertexes.size()], point) < 0)
+                    windingNumber--;
+            }
         }
     }
+
+    return windingNumber != 0;
 }
 
-template <typename T>
-void Polygon<T>::find_edges(const typename std::vector<Coor<T>>::iterator vertex, std::vector<edge<T>> &edges_list)
-{
-    auto edge = edges.begin();
-    for(; edge != edges.end(); edge++){
-        if(edge->Coor_pair.first == *vertex || edge->Coor_pair.second == *vertex){
-            edges_list.push_back(*edge);
-        }
-    }
-}
 
 /**************************************************************************************
  * remove the redundancy point in the polygon
@@ -132,7 +133,7 @@ void Polygon_shrink_redundancy_point(const Polygon<T> &polygon,  Polygon<T> &pol
         if (find_duplicate)
         {
             if((e+1) == polygon.edges.end()){
-                polygon_shrink.vertexes.erase(v);
+                *(polygon_shrink.vertexes.end()-1) = *(polygon_shrink.vertexes.begin()+1);
                 polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
                 break;
             }
@@ -157,8 +158,9 @@ void Polygon_shrink_redundancy_point(const Polygon<T> &polygon,  Polygon<T> &pol
  * remove the redundancy edge in the polygon
 */
 template <typename T>
-void Polygon_shrink_redundancy_edge(const Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
+bool Polygon_shrink_redundancy_edge(const Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
 {
+    int original_size = polygon_shrink.vertexes.size();
     auto v = polygon_shrink.vertexes.begin() + 1;
 
     for(auto e = polygon.edges.begin(); ; e++){
@@ -235,8 +237,13 @@ void Polygon_shrink_redundancy_edge(const Polygon<T> &polygon,  Polygon<T> &poly
         if( (e+1) == polygon.edges.end() )
             break;
     }
-        
-    polygon_shrink.edges_init();
+    
+    int shrink_size = polygon_shrink.vertexes.size();
+    if(original_size == shrink_size)
+        return false;
+    else
+        polygon_shrink.edges_init();
+        return true;
 }
 
 /***************************************************************************************
@@ -260,59 +267,67 @@ void Edge_list_complement(
 //    std::cout << "Upl is " << Upl << std::endl;
 
     /***********************************************************************************
-     * complement edges step 0: remove all redundancy points in polygon
+     * complement edges step 1: remove Pk-Pl and collect all other edges in polygon and rectangle
      */
     Polygon<T> polygon_tmp = polygon;
     polygon_tmp.vertexes = polygon.vertexes;
     polygon_tmp.edges = polygon.edges;
 
-    Polygon_shrink_redundancy_point(polygon, polygon_tmp);
+//    Polygon_shrink_redundancy_point(polygon, polygon_tmp);
 
-    std::cout << "Polygon_tmp is " << std::endl;
-    for(auto v : polygon_tmp.vertexes){
-        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
-    }
+//    std::cout << "Polygon_tmp is " << std::endl;
+//    for(auto v : polygon_tmp.vertexes){
+//        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+//    }
 
-    /***********************************************************************************
-     * complement edges step 1: remove Pk-Pl and collect all other edges in polygon and rectangle
-     */
-    // find Pi->Pk, Pk -> Pl, Pl->Pj edges in polygon
+    // find Pk -> Pl edges in polygon
     auto itr_kl = polygon_tmp.edges.begin();
-    edge<T> edge_ik = *itr_kl;
-    edge<T> edge_lj = *itr_kl;
+    auto itr_v  = polygon_tmp.vertexes.begin();
 
     for(; itr_kl != polygon_tmp.edges.end(); itr_kl++){
-        if(itr_kl->Coor_pair.first == Pk && itr_kl->Coor_pair.second == Pl){
-            break;
+        itr_v = itr_v + 1;
+
+        if(itr_kl->Coor_pair.first.getY() == itr_kl->Coor_pair.second.getY()){
+            if(itr_kl->Coor_pair.first == Pk){
+                if(itr_kl->Coor_pair.second == Pl)
+                    break;
+                else {
+                    polygon_tmp.vertexes.insert(itr_v, Pl);
+                    polygon_tmp.edges_init();
+                    break;
+                }
+            }
+            else if(itr_kl->Coor_pair.first == Pl){
+                if(itr_kl->Coor_pair.second == Pk)
+                    break;
+                else {
+                    polygon_tmp.vertexes.insert(itr_v, Pk);
+                    polygon_tmp.edges_init();
+                    break;
+                }
+            }
         }
+        else{
+            continue;
+        }
+        
         if( (itr_kl+1) == polygon_tmp.edges.end()){
             std::cout << "Error: Pk -> Pl edge not found in polygon" << std::endl;
             return;
         }
     }
 
-    if(itr_kl == polygon_tmp.edges.begin()){
-//        std::cout << "Case 1:" << std::endl;
-        edge_ik = *(polygon_tmp.edges.end()-1);
-        edge_lj = *(polygon_tmp.edges.begin()+1);
-    }
-    else if(itr_kl == polygon_tmp.edges.end()-1){
-//        std::cout << "Case 2:" << std::endl;
-        edge_ik = *(polygon_tmp.edges.end()-2);
-        edge_lj = *(polygon_tmp.edges.begin());
-    }
-    else{
-//        std::cout << "Case 3:" << std::endl;
-        edge_ik = *(itr_kl - 1);
-        edge_lj = *(itr_kl + 1);
-    }
-
     // remove Pk-Pl and collect all other edges in polygon and rectangle
     for(auto e = polygon_tmp.edges.begin(); e != polygon_tmp.edges.end(); e++){
-        if(e == itr_kl){
+        if( (e->Coor_pair.first == Pk) && (e->Coor_pair.second == Pl) ){
             polygon_complement.edges.push_back(edge<T>(Pk, Upl));
             polygon_complement.edges.push_back(edge<T>(Upl, Upr));
             polygon_complement.edges.push_back(edge<T>(Upr, Pl));
+        }
+        else if((e->Coor_pair.first == Pl) && (e->Coor_pair.second == Pk)){
+            polygon_complement.edges.push_back(edge<T>(Pl, Upr));
+            polygon_complement.edges.push_back(edge<T>(Upr, Upl));
+            polygon_complement.edges.push_back(edge<T>(Upl, Pk));
         }
         else
             polygon_complement.edges.push_back(*e);
@@ -325,18 +340,52 @@ void Edge_list_complement(
     }
 
    /**********************************************************************************
-     * complement egdes step 2: 
+     * complement edges step 2: remove redundancy_edge
     */ 
     
     Polygon<int> poly_shrink;
     poly_shrink.vertexes = polygon_complement.vertexes;
 
-    Polygon_shrink_redundancy_edge(polygon_complement, poly_shrink);
+    bool redundancy = true;
+
+    while(redundancy){
+        redundancy = Polygon_shrink_redundancy_edge(polygon_complement, poly_shrink);
+
+        if(poly_shrink.vertexes.size() == 1){
+            break;
+        }
+
+        if(redundancy){
+            polygon_complement.vertexes = poly_shrink.vertexes;
+            polygon_complement.edges = poly_shrink.edges;
+        }
+    }
 
     std::cout << "After shrink, polygon_complement is " << std::endl;
     for(auto v : poly_shrink.vertexes){
         std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
     }
+
+    // Copy poly_shrink to polygon_complement
+    polygon_complement.vertexes = poly_shrink.vertexes;
+    polygon_complement.edges = poly_shrink.edges;
+
+    /**********************************************************************************
+     * complement edges step 3: remove redundancy_edge
+    */ 
+    if(polygon_complement.vertexes.size() == 1){
+        return;
+    }
+    poly_shrink.vertexes = polygon_complement.vertexes;
+    poly_shrink.edges = polygon_complement.edges;
+
+    Polygon_shrink_redundancy_point(polygon_complement, poly_shrink);
+
+    std::cout << "Test" << std::endl;
+
+    polygon_complement.vertexes = poly_shrink.vertexes;
+    polygon_complement.edges = poly_shrink.edges;
+
 }
 
 #endif

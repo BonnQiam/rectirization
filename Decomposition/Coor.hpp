@@ -294,4 +294,12 @@ inline bool operator== (const Coor<double>& lhs, const Coor<double>& rhs)
 	return true;
 }
 
+/******************************************************************************
+ * isLef() operation
+*/
+template <typename T>
+double isLeft(Coor<T> a, Coor<T> b, Coor<T> c){
+	return (b.getX() - a.getX()) * (c.getY() - a.getY()) - (c.getX() - a.getX()) * (b.getY() - a.getY());
+}
+
 #endif
