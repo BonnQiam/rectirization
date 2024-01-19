@@ -5,6 +5,9 @@ void test_Polygon();
 void test_Polygon_shrink();
 void test_Edge_list_complement();
 
+#define test_shrink_redundancy_edge  1
+#define test_shrink_redundancy_point 0
+
 int main(){
 
 //    test_Polygon();
@@ -75,7 +78,12 @@ void test_Polygon_shrink()
     poly.vertexes.push_back(Coor<int>(0, 5));
     poly.vertexes.push_back(Coor<int>(0, 0));
     poly.edges_init();
-    
+
+#if test_shrink_redundancy_point
+    /************************************************************
+     * Test Polygon_shrink_redundancy_point
+    */
+
     // Copy poly to poly_shrink
     Polygon<int> poly_shrink;
     poly_shrink.edges = poly.edges;
@@ -86,12 +94,37 @@ void test_Polygon_shrink()
         std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
     }
 
-    Polygon_shrink(poly, poly_shrink);
+    Polygon_shrink_redundancy_point(poly, poly_shrink);
 
     std::cout << "Polygon after shrink is " << std::endl;
     for(auto v: poly_shrink.vertexes){
         std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
     }
+#endif
+
+
+#if test_shrink_redundancy_edge
+    /************************************************************
+     * Test Polygon_shrink_redundancy_edge
+    */
+
+    // Copy poly to poly_shrink
+    Polygon<int> poly_shrink;
+    poly_shrink.edges = poly.edges;
+    poly_shrink.vertexes = poly.vertexes;
+
+    std::cout << "Polygon before shrink is " << std::endl;
+    for(auto v: poly_shrink.vertexes){
+        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+    }
+
+    Polygon_shrink_redundancy_edge(poly, poly_shrink);
+
+    std::cout << "Polygon after shrink is " << std::endl;
+    for(auto v: poly_shrink.vertexes){
+        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+    }
+#endif
 }
 
 void test_Edge_list_complement()
@@ -99,6 +132,7 @@ void test_Edge_list_complement()
 
     Polygon<int> poly;
     poly.vertexes.push_back(Coor<int>(0, 0));
+    poly.vertexes.push_back(Coor<int>(1, 0));
     poly.vertexes.push_back(Coor<int>(2, 0));
     poly.vertexes.push_back(Coor<int>(2, 2));
     poly.vertexes.push_back(Coor<int>(0, 2));

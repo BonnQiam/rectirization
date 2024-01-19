@@ -96,11 +96,68 @@ void Polygon<T>::find_edges(const typename std::vector<Coor<T>>::iterator vertex
     }
 }
 
-/************************************************************
- * shrink the polygon by remove the duplicated edges
+/**************************************************************************************
+ * remove the redundancy point in the polygon
 */
 template <typename T>
-void Polygon_shrink(Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
+void Polygon_shrink_redundancy_point(const Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
+{
+    auto v = polygon_shrink.vertexes.begin() + 1;
+
+    for(auto e = polygon.edges.begin(); ; e++){
+        auto e_nxt = ( (e+1) == polygon.edges.end() ) ? polygon.edges.begin() : (e+1);
+
+        bool find_duplicate = false;
+
+        T e_X     = e->Coor_pair.second.getX() - e->Coor_pair.first.getX();
+        T e_nxt_X = e_nxt->Coor_pair.second.getX() - e_nxt->Coor_pair.first.getX();
+        
+        T e_Y     = e->Coor_pair.second.getY() - e->Coor_pair.first.getY();
+        T e_nxt_Y = e_nxt->Coor_pair.second.getY() - e_nxt->Coor_pair.first.getY();
+
+        if(
+            (e->Coor_pair.second.getY() == e->Coor_pair.first.getY() ) &&
+            (e_nxt->Coor_pair.second.getY() == e_nxt->Coor_pair.first.getY() )
+        ){
+            if(e_X*e_nxt_X > 0)
+                find_duplicate = true;
+        }
+        else if ( (e->Coor_pair.second.getX() == e->Coor_pair.first.getX() ) &&
+            (e_nxt->Coor_pair.second.getX() == e_nxt->Coor_pair.first.getX() )
+        ){
+            if(e_Y*e_nxt_Y > 0)
+                find_duplicate = true;
+        }
+
+        if (find_duplicate)
+        {
+            if((e+1) == polygon.edges.end()){
+                polygon_shrink.vertexes.erase(v);
+                polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
+                break;
+            }
+            else{
+                polygon_shrink.vertexes.erase(v);
+                e = e+1;
+                v = v+1;
+                if(e == (polygon.edges.end()-1))
+                    break;
+                continue;
+            }
+        }
+        v=v+1;
+
+        if( (e+1) == polygon.edges.end() )
+            break;
+    }
+    polygon_shrink.edges_init();
+}
+
+/****************************************************************************************
+ * remove the redundancy edge in the polygon
+*/
+template <typename T>
+void Polygon_shrink_redundancy_edge(const Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
 {
     auto v = polygon_shrink.vertexes.begin() + 1;
 
@@ -112,91 +169,67 @@ void Polygon_shrink(Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
 //        std::cout << "v is " << *v << std::endl;
 
         // e and e_nxt area horizontal edges
+        bool find_duplicate = false;
+
+        T e_X     = e->Coor_pair.second.getX() - e->Coor_pair.first.getX();
+        T e_nxt_X = e_nxt->Coor_pair.second.getX() - e_nxt->Coor_pair.first.getX();
+        
+        T e_Y     = e->Coor_pair.second.getY() - e->Coor_pair.first.getY();
+        T e_nxt_Y = e_nxt->Coor_pair.second.getY() - e_nxt->Coor_pair.first.getY();
+        
         if(
             (e->Coor_pair.second.getY() == e->Coor_pair.first.getY() ) &&
             (e_nxt->Coor_pair.second.getY() == e_nxt->Coor_pair.first.getY() )
         ){
-            T e_X     = e->Coor_pair.second.getX() - e->Coor_pair.first.getX();
-            T e_nxt_X = e_nxt->Coor_pair.second.getX() - e_nxt->Coor_pair.first.getX();
-            T v_NewX  = e_nxt->Coor_pair.second.getX();
-            if(e_X*e_nxt_X < 0){
-                if( v_NewX == e->Coor_pair.first.getX() ){
-                    if((e+1) == polygon.edges.end()){
-                        polygon_shrink.vertexes.erase(v);
-                        polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
-                        break;
-                    }
-                    else{
-                        polygon_shrink.vertexes.erase(v);
-                        polygon_shrink.vertexes.erase(v);
-
-                        e = e+1;
-                        if(e == (polygon.edges.end()-1))
-                            break;
-                        continue;
-                    }
-                }
-                else{
-                    if((e+1) == polygon.edges.end()){
-                        *polygon_shrink.vertexes.end() = *(polygon_shrink.vertexes.begin()+1);
-                        polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
-
-                        break;
-                    }
-                    else{
-                        polygon_shrink.vertexes.erase(v);
-                        e = e+1;
-                        v = v+1;
-                        if(e == (polygon.edges.end()-1))
-                            break;
-                        continue;
-                    }
-                }
-                
-            }
+            if(e_X*e_nxt_X < 0)
+                find_duplicate = true;
         }
-        // e and e_nxt area vertical edges
-        if( (e->Coor_pair.second.getX() == e->Coor_pair.first.getX() ) &&
+        else if ( (e->Coor_pair.second.getX() == e->Coor_pair.first.getX() ) &&
             (e_nxt->Coor_pair.second.getX() == e_nxt->Coor_pair.first.getX() )
         ){
-            T e_Y     = e->Coor_pair.second.getY() - e->Coor_pair.first.getY();
-            T e_nxt_Y = e_nxt->Coor_pair.second.getY() - e_nxt->Coor_pair.first.getY();
+            if(e_Y*e_nxt_Y < 0)
+                find_duplicate = true;
+        }
+
+        if(find_duplicate){
+            T v_NewX  = e_nxt->Coor_pair.second.getX();
             T v_NewY  = e_nxt->Coor_pair.second.getY();
 
-            if(e_Y*e_nxt_Y < 0){
-                if(v_NewY == e->Coor_pair.first.getY()){
-                    if((e+1) == polygon.edges.end()){
-                        polygon_shrink.vertexes.erase(v);
-                        polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
-                        break;
-                    }
-                    else{
-                        polygon_shrink.vertexes.erase(v);
-                        polygon_shrink.vertexes.erase(v);
-                        
-                        e = e+1;
-                        if(e == (polygon.edges.end()-1))
-                            break;
-                        continue;
-                    }
+            if( (v_NewX == e->Coor_pair.first.getX()) && (v_NewY == e->Coor_pair.first.getY()) ){
+                if((e+1) == polygon.edges.end()){
+                    polygon_shrink.vertexes.erase(v);
+                    polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
+                    break;
                 }
                 else{
-                    if( (e+1) == polygon.edges.end() ){
-                        *(polygon_shrink.vertexes.end()-1) = *(polygon_shrink.vertexes.begin()+1);
-                        polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
+                    polygon_shrink.vertexes.erase(v);
+                    polygon_shrink.vertexes.erase(v);
+
+                    e = e+1;
+                    if(e == (polygon.edges.end()-1))
                         break;
-                    }
-                    else{
-                        polygon_shrink.vertexes.erase(v);
-                        e = e+1;
-                        v = v+1;
-                        if(e == (polygon.edges.end()-1))
-                            break;
-                        continue;
-                    }
+                    continue;
+                }
+            }
+            else{
+                if((e+1) == polygon.edges.end()){
+
+                    *(polygon_shrink.vertexes.end()-1) = *(polygon_shrink.vertexes.begin()+1);
+                    polygon_shrink.vertexes.erase(polygon_shrink.vertexes.begin());
+                    break;
+                }
+                else{
+                    polygon_shrink.vertexes.erase(v);
+
+                    e = e+1;
+                    v = v+1;
+                    if(e == (polygon.edges.end()-1))
+                        break;
+                    continue;
                 }
             }
         }
+
         v=v+1;
 
         if( (e+1) == polygon.edges.end() )
@@ -206,7 +239,7 @@ void Polygon_shrink(Polygon<T> &polygon,  Polygon<T> &polygon_shrink)
     polygon_shrink.edges_init();
 }
 
-/************************************************************
+/***************************************************************************************
  * Edge complement operation
 */
 
@@ -226,30 +259,47 @@ void Edge_list_complement(
 //    std::cout << "Upr is " << Upr << std::endl;
 //    std::cout << "Upl is " << Upl << std::endl;
 
+    /***********************************************************************************
+     * complement edges step 0: remove all redundancy points in polygon
+     */
+    Polygon<T> polygon_tmp = polygon;
+    polygon_tmp.vertexes = polygon.vertexes;
+    polygon_tmp.edges = polygon.edges;
+
+    Polygon_shrink_redundancy_point(polygon, polygon_tmp);
+
+    std::cout << "Polygon_tmp is " << std::endl;
+    for(auto v : polygon_tmp.vertexes){
+        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+    }
+
+    /***********************************************************************************
+     * complement edges step 1: remove Pk-Pl and collect all other edges in polygon and rectangle
+     */
     // find Pi->Pk, Pk -> Pl, Pl->Pj edges in polygon
-    auto itr_kl = polygon.edges.begin();
+    auto itr_kl = polygon_tmp.edges.begin();
     edge<T> edge_ik = *itr_kl;
     edge<T> edge_lj = *itr_kl;
 
-    for(; itr_kl != polygon.edges.end(); itr_kl++){
+    for(; itr_kl != polygon_tmp.edges.end(); itr_kl++){
         if(itr_kl->Coor_pair.first == Pk && itr_kl->Coor_pair.second == Pl){
             break;
         }
-        if(itr_kl == polygon.edges.end()){
+        if( (itr_kl+1) == polygon_tmp.edges.end()){
             std::cout << "Error: Pk -> Pl edge not found in polygon" << std::endl;
             return;
         }
     }
 
-    if(itr_kl == polygon.edges.begin()){
+    if(itr_kl == polygon_tmp.edges.begin()){
 //        std::cout << "Case 1:" << std::endl;
-        edge_ik = *(polygon.edges.end()-1);
-        edge_lj = *(polygon.edges.begin()+1);
+        edge_ik = *(polygon_tmp.edges.end()-1);
+        edge_lj = *(polygon_tmp.edges.begin()+1);
     }
-    else if(itr_kl == polygon.edges.end()-1){
+    else if(itr_kl == polygon_tmp.edges.end()-1){
 //        std::cout << "Case 2:" << std::endl;
-        edge_ik = *(polygon.edges.end()-2);
-        edge_lj = *(polygon.edges.begin());
+        edge_ik = *(polygon_tmp.edges.end()-2);
+        edge_lj = *(polygon_tmp.edges.begin());
     }
     else{
 //        std::cout << "Case 3:" << std::endl;
@@ -257,8 +307,8 @@ void Edge_list_complement(
         edge_lj = *(itr_kl + 1);
     }
 
-    // complement edges step 1: remove Pk-Pl and collect all other edges in polygon and rectangle
-    for(auto e = polygon.edges.begin(); e != polygon.edges.end(); e++){
+    // remove Pk-Pl and collect all other edges in polygon and rectangle
+    for(auto e = polygon_tmp.edges.begin(); e != polygon_tmp.edges.end(); e++){
         if(e == itr_kl){
             polygon_complement.edges.push_back(edge<T>(Pk, Upl));
             polygon_complement.edges.push_back(edge<T>(Upl, Upr));
@@ -274,12 +324,14 @@ void Edge_list_complement(
         std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
     }
 
-    // complement egdes step 2: 
+   /**********************************************************************************
+     * complement egdes step 2: 
+    */ 
     
     Polygon<int> poly_shrink;
     poly_shrink.vertexes = polygon_complement.vertexes;
 
-    Polygon_shrink(polygon_complement, poly_shrink);
+    Polygon_shrink_redundancy_edge(polygon_complement, poly_shrink);
 
     std::cout << "After shrink, polygon_complement is " << std::endl;
     for(auto v : poly_shrink.vertexes){
