@@ -66,16 +66,18 @@ void test_Polygon_shrink()
     poly.vertexes.push_back(Coor<int>(0, 0));
     poly.vertexes.push_back(Coor<int>(1, 0));
     poly.vertexes.push_back(Coor<int>(2, 0));
-//    poly.vertexes.push_back(Coor<int>(2, 2));
+    poly.vertexes.push_back(Coor<int>(2, 2));
     poly.vertexes.push_back(Coor<int>(2, 3));
     poly.vertexes.push_back(Coor<int>(2, 2));
     poly.vertexes.push_back(Coor<int>(0, 2));
     poly.vertexes.push_back(Coor<int>(0, 0));
     poly.vertexes.push_back(Coor<int>(0, -1));
     poly.vertexes.push_back(Coor<int>(0, 0));
-    poly.vertexes.push_back(Coor<int>(0, 5));
+    poly.vertexes.push_back(Coor<int>(5, 0));
     poly.vertexes.push_back(Coor<int>(0, 0));
 */
+
+/*
     poly.vertexes.push_back(Coor<int>(1, 4));
     poly.vertexes.push_back(Coor<int>(2, 4));
     poly.vertexes.push_back(Coor<int>(2, 3));
@@ -86,13 +88,40 @@ void test_Polygon_shrink()
     poly.vertexes.push_back(Coor<int>(2, 3));
     poly.vertexes.push_back(Coor<int>(2, 4));
     poly.vertexes.push_back(Coor<int>(1, 4));
+*/
+    poly.vertexes.push_back(Coor<int>(175, 146));
+    poly.vertexes.push_back(Coor<int>(228, 146));
+    poly.vertexes.push_back(Coor<int>(228, 242));
+    poly.vertexes.push_back(Coor<int>(264, 242));
+    poly.vertexes.push_back(Coor<int>(264, 322));
+    poly.vertexes.push_back(Coor<int>(485, 322));
+    poly.vertexes.push_back(Coor<int>(485, 306));
+    poly.vertexes.push_back(Coor<int>(485, 322));
+    poly.vertexes.push_back(Coor<int>(297, 322));
+    poly.vertexes.push_back(Coor<int>(297, 306));
+    poly.vertexes.push_back(Coor<int>(297, 322));
+    poly.vertexes.push_back(Coor<int>(264, 322));
+    poly.vertexes.push_back(Coor<int>(264, 242));
+    poly.vertexes.push_back(Coor<int>(228, 242));
+    poly.vertexes.push_back(Coor<int>(228, 146));
+    poly.vertexes.push_back(Coor<int>(175, 146));
+    poly.vertexes.push_back(Coor<int>(175, 82));
+    poly.vertexes.push_back(Coor<int>(485, 82));
+    poly.vertexes.push_back(Coor<int>(485, 322));
+    poly.vertexes.push_back(Coor<int>(537, 322));
+    poly.vertexes.push_back(Coor<int>(537, 306));
+    poly.vertexes.push_back(Coor<int>(485, 306));
+    poly.vertexes.push_back(Coor<int>(485, 82));
+    poly.vertexes.push_back(Coor<int>(175, 82));
+    poly.vertexes.push_back(Coor<int>(175, 146));
 
     poly.edges_init();
 
 #if test_shrink_redundancy_edge_loop
     bool redundancy = true;
 
-    while(redundancy){
+//    while(redundancy){
+    for(int i=0; i<1; i++){
         Polygon<int> poly_shrink;
         poly_shrink.edges = poly.edges;
         poly_shrink.vertexes = poly.vertexes;
