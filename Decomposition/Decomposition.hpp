@@ -25,7 +25,7 @@ void Decomposition(
     while(poly_copy.vertexes.size() > 1){
 //    for(int i=0; i<13; i++){
         const auto& coor_tuple = findCoorTuple_Refactor(poly_copy);
-
+        
         const auto Pk = std::get<0>(coor_tuple);
         const auto Pl = std::get<1>(coor_tuple);
         const auto Pm = std::get<2>(coor_tuple);
@@ -82,6 +82,7 @@ static auto findCoorTuple_Refactor(Polygon<T>& polygon)
     bool legal_Pk = false;
     auto Pk = poly_copy.vertexes.begin();
     while(1){
+
         Pk = std::min_element(poly_copy.vertexes.begin(), poly_copy.vertexes.end(), 
         [](const auto& lhs, const auto& rhs) -> bool {
                 if (lhs.getY() != rhs.getY()) { 
@@ -92,6 +93,7 @@ static auto findCoorTuple_Refactor(Polygon<T>& polygon)
                     }
             }
         );
+
         // Check the Pk
         Coor<T> Test = *Pk;
         Test.addToX(1);
@@ -99,8 +101,9 @@ static auto findCoorTuple_Refactor(Polygon<T>& polygon)
 
         legal_Pk = polygon.isInside(Test);
 
-        if(legal_Pk)
+        if(legal_Pk){
             break;
+        }
         else{
             poly_copy.vertexes.erase(Pk);
         }

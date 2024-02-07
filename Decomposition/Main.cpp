@@ -36,7 +36,7 @@ void test_Polygon()
         std::cout << "(" << e.Coor_pair.second.getX() << ", " << e.Coor_pair.second.getY() << ")" << std::endl;
     }
 
-    Coor<int> point = Coor<int>(1, 1);
+    Coor<int> point = Coor<int>(0, 1);
     if(poly.isInside(point)){
         std::cout << "point (" << point.getX() << ", " << point.getY() << ") is inside polygon" << std::endl;
     }
@@ -249,7 +249,7 @@ void test_Edge_list_complement()
 void test_Decomposition()
 {
     Polygon<int> poly;
-/*
+/*  case 1
     poly.vertexes.push_back(Coor<int>(1, 1));
     poly.vertexes.push_back(Coor<int>(4, 1));
     poly.vertexes.push_back(Coor<int>(4, 2));
@@ -265,6 +265,7 @@ void test_Decomposition()
     poly.vertexes.push_back(Coor<int>(1, 1));
 */
 
+/*
     poly.vertexes.push_back(Coor<int>(308, 2));
     poly.vertexes.push_back(Coor<int>(308, 66));
     poly.vertexes.push_back(Coor<int>(175, 66));
@@ -275,7 +276,7 @@ void test_Decomposition()
     poly.vertexes.push_back(Coor<int>(228, 242));
     poly.vertexes.push_back(Coor<int>(264, 242));
     poly.vertexes.push_back(Coor<int>(264, 322));
-    poly.vertexes.push_back(Coor<int>(485, 322)); //! duplicate point
+    poly.vertexes.push_back(Coor<int>(485, 322));
     poly.vertexes.push_back(Coor<int>(485, 306));
     poly.vertexes.push_back(Coor<int>(297, 306));
     poly.vertexes.push_back(Coor<int>(297, 82));
@@ -286,6 +287,7 @@ void test_Decomposition()
     poly.vertexes.push_back(Coor<int>(314, 66));
     poly.vertexes.push_back(Coor<int>(314, 2));
     poly.vertexes.push_back(Coor<int>(308, 2));
+*/
 
 /*
     poly.vertexes.push_back(Coor<int>(5, 98));
@@ -306,6 +308,21 @@ void test_Decomposition()
     poly.vertexes.push_back(Coor<int>(297, 98));
     poly.vertexes.push_back(Coor<int>(5, 98));
 */
+
+/*
+x: 0, y: 350000
+x: 0, y: 400000
+x: 1014, y: 400000
+x: 1014, y: 350000
+x: 0, y: 350000
+*/
+    poly.vertexes.push_back(Coor<int>(0, 350000));
+    poly.vertexes.push_back(Coor<int>(0, 400000));
+    poly.vertexes.push_back(Coor<int>(1014, 400000));
+    poly.vertexes.push_back(Coor<int>(1014, 350000));
+    poly.vertexes.push_back(Coor<int>(0, 350000));
+
+
     poly.edges_init();
 
     std::vector< Polygon<int> > result;

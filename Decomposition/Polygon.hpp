@@ -73,6 +73,13 @@ void Polygon<T>::vertexes_init()
     vertexes.push_back(edges.back().Coor_pair.second);
 }
 
+// Calculate the area of a triangle formed by three points
+template <typename T>
+double triangleArea(const Coor<T>& p1, const Coor<T>& p2, const Coor<T>& p3) {
+    // calculate the area of a triangle
+    return 0.5 * (p1.getX() * p2.getY() + p2.getX() * p3.getY() + p3.getX() * p1.getY() - p1.getX() * p3.getY() - p2.getX() * p1.getY() - p3.getX() * p2.getY());
+}
+
 template <typename T>
 bool Polygon<T>::isInside(Coor<T> point)
 {
@@ -90,6 +97,11 @@ bool Polygon<T>::isInside(Coor<T> point)
                 if(isLeft(vertexes[i], vertexes[(i+1) % vertexes.size()], point) < 0)
                     windingNumber--;
             }
+        }
+
+        double area = triangleArea(vertexes[i], vertexes[(i+1) % vertexes.size()], point);
+        if(area == 0){
+            return true;
         }
     }
 
@@ -173,18 +185,26 @@ bool Polygon_shrink_redundancy_edge(const Polygon<T> &polygon,  Polygon<T> &poly
         T e_Y     = e->Coor_pair.second.getY() - e->Coor_pair.first.getY();
         T e_nxt_Y = e_nxt->Coor_pair.second.getY() - e_nxt->Coor_pair.first.getY();
 
+        int e_X_sign = (e_X > 0) ? 1 : -1;
+        int e_Y_sign = (e_Y > 0) ? 1 : -1;
+        int e_nxt_X_sign = (e_nxt_X > 0) ? 1 : -1;
+        int e_nxt_Y_sign = (e_nxt_Y > 0) ? 1 : -1;
+
         if(
             (e->Coor_pair.second.getY() == e->Coor_pair.first.getY() ) &&
             (e_nxt->Coor_pair.second.getY() == e_nxt->Coor_pair.first.getY() )
         ){
-            if(e_X*e_nxt_X < 0)
+//            if(e_X*e_nxt_X < 0)
+            if(e_X_sign != e_nxt_X_sign)
                 find_duplicate = true;
         }
         else if ( (e->Coor_pair.second.getX() == e->Coor_pair.first.getX() ) &&
             (e_nxt->Coor_pair.second.getX() == e_nxt->Coor_pair.first.getX() )
         ){
-            if(e_Y*e_nxt_Y < 0)
+//            if(e_Y*e_nxt_Y < 0){
+            if(e_Y_sign != e_nxt_Y_sign){
                 find_duplicate = true;
+            }
         }
 
         if(find_duplicate){
@@ -336,6 +356,13 @@ void Edge_list_complement(
     while(redundancy){
         redundancy = Polygon_shrink_redundancy_edge(polygon_complement, poly_shrink);
 
+        std::cout << "Just for debug" << std::endl;
+        std::cout << "redunancy is " << redundancy << std::endl;
+        for(auto v : poly_shrink.vertexes){
+            std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+        }
+
+
         if(poly_shrink.vertexes.size() == 1){
             break;
         }
@@ -365,8 +392,6 @@ void Edge_list_complement(
     poly_shrink.edges = polygon_complement.edges;
 
     Polygon_shrink_redundancy_point(polygon_complement, poly_shrink);
-
-    std::cout << "Test" << std::endl;
 
     polygon_complement.vertexes = poly_shrink.vertexes;
     polygon_complement.edges = poly_shrink.edges;
