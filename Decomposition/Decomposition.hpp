@@ -79,6 +79,19 @@ static auto findCoorTuple_Refactor(Polygon<T>& polygon)
     poly_copy.vertexes   = polygon.vertexes;
     poly_copy.edges      = polygon.edges;
 
+    /*
+    auto Pk = std::min_element(poly_copy.vertexes.begin(), poly_copy.vertexes.end(), 
+        [](const auto& lhs, const auto& rhs) -> bool {
+                if (lhs.getY() != rhs.getY()) { 
+                    return (lhs.getY() < rhs.getY()); 
+                    }
+                else { 
+                    return (lhs.getX() < rhs.getX()); 
+                    }
+            }
+        );
+    */
+    
     bool legal_Pk = false;
     auto Pk = poly_copy.vertexes.begin();
     while(1){
@@ -109,7 +122,6 @@ static auto findCoorTuple_Refactor(Polygon<T>& polygon)
         }
         
     }
-
     // find Pl: the bottom and the left-most coordinate except Pk
     auto Pl = std::min_element(poly_copy.vertexes.begin(), poly_copy.vertexes.end(), 
         [&Pk](const auto& lhs, const auto& rhs) -> bool {

@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
+
 #include "Decomposition.hpp"
 
 void test_Polygon();
@@ -310,31 +313,46 @@ void test_Decomposition()
 */
 
 /*
-x: 0, y: 350000
-x: 0, y: 400000
-x: 1014, y: 400000
-x: 1014, y: 350000
-x: 0, y: 350000
-*/
     poly.vertexes.push_back(Coor<int>(0, 350000));
     poly.vertexes.push_back(Coor<int>(0, 400000));
     poly.vertexes.push_back(Coor<int>(1014, 400000));
     poly.vertexes.push_back(Coor<int>(1014, 350000));
     poly.vertexes.push_back(Coor<int>(0, 350000));
+*/
 
+    // 打开并读取文件
+    std::ifstream file("Polygon.txt");
+    std::string line;
 
+    // 循环遍历每一行 x,y
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string x_str, y_str;
+        std::getline(iss, x_str, ',');
+        std::getline(iss, y_str, ',');
+
+        int x = std::stoi(x_str);
+        int y = std::stoi(y_str);
+
+        poly.vertexes.push_back(Coor<int>(x, y));
+    }
+
+    // 关闭文件
+    file.close();
+
+    // 初始化边
     poly.edges_init();
 
     std::vector< Polygon<int> > result;
     Decomposition(poly, result);
 
-/*
-    std::cout << "result: " << std::endl;
-    for(auto poly : result){
-        for(auto v : poly.vertexes){
-            std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+    // output to Rectangle.txt
+    std::ofstream outfile("Rectangle.txt");
+    for(auto rec: result){
+        for(auto v: rec.vertexes){
+            outfile << v.getX() << "," << v.getY() << std::endl;
         }
-        std::cout << std::endl;
     }
-*/
+    // 关闭文件
+    outfile.close();
 }

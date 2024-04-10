@@ -1,87 +1,20 @@
 import matplotlib.pyplot as plt
 
-rectangle_1 = [
-(308, 2),
-(314, 2),
-(314, 66),
-(308, 66),
-(308, 2)
-]
+# 打开并读取文件
+with open('Rectangle.txt', 'r') as file:
+    lines = file.readlines()
 
-rectangle_2 = [
-(175, 66),
-(537, 66),
-(537, 82),
-(175, 82),
-(175, 66)
-]
+# 创建一个空列表来存储矩形
+rectangles = []
 
-rectangle_3 = [
-(175, 82),
-(297, 82),
-(297, 98),
-(175, 98),
-(175, 82)
-]
-
-rectangle_4 = [
-(485, 82),
-(537, 82),
-(537, 306),
-(485, 306),
-(485, 82)
-]
-
-rectangle_5 = [
-(5, 98),
-(175, 98),
-(175, 146),
-(5, 146),
-(5, 98)
-]
-
-rectangle_6 = [
-(175, 98),
-(297, 98),
-(297, 146),
-(175, 146),
-(175, 98)
-]
-
-rectangle_7 = [
-(228, 146),
-(297, 146),
-(297, 242),
-(228, 242),
-(228, 146)
-]
-
-rectangle_8 = [
-(264, 242),
-(297, 242),
-(297, 322),
-(264, 322),
-(264, 242)
-]
-
-rectangle_9 = [
-(297, 306),
-(485, 306),
-(485, 322),
-(297, 322),
-(297, 306)
-]
-
-rectangle_10 = [
-(485, 306),
-(537, 306),
-(537, 322),
-(485, 322),
-(485, 306)
-]
+# 循环遍历每四行
+for i in range(0, len(lines), 4):
+    # 将四行的坐标转换为元组，并添加到矩形列表中
+    rectangle = [tuple(map(int, line.strip().split(','))) for line in lines[i:i+4]]
+    rectangles.append(rectangle)
 
 # plot all rectangles
-for rectangle in [rectangle_1, rectangle_2, rectangle_3, rectangle_4, rectangle_5, rectangle_6, rectangle_7, rectangle_8, rectangle_9, rectangle_10]:
+for rectangle in rectangles:
     x, y = zip(*rectangle)
     plt.plot(x, y, marker='^', color='blue')
     plt.fill(x, y, alpha=0.3)
