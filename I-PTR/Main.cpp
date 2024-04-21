@@ -36,11 +36,11 @@ void Test_Coor(){
     std::cout << "Result of subtraction: " << result_sub << std::endl;
 
     // Example 3: Addition of Coor object with rvalue reference
-    Coor<int> result_add_rvalue = std::move(a) + Coor<int>(2, 2);  // Calls the operator+ overload with rvalue reference
+    Coor<int> result_add_rvalue = std::move(a) + (2, 2);  // Calls the operator+ overload with rvalue reference
     std::cout << "Result of addition with rvalue reference: " << result_add_rvalue << std::endl;
 
     // Example 4: Subtraction of Coor object with rvalue reference
-    Coor<int> result_sub_rvalue = std::move(a) - Coor<int>(2, 2);  // Calls the operator- overload with rvalue reference
+    Coor<int> result_sub_rvalue = std::move(a) - (2, 2);  // Calls the operator- overload with rvalue reference
     std::cout << "Result of subtraction with rvalue reference: " << result_sub_rvalue << std::endl;
 
     // Example 5: Addition of Coor object with scalar value
@@ -77,6 +77,7 @@ void Test_PTR()
     polygon.emplace_back(2, 4);
     polygon.emplace_back(2, 2);
     polygon.emplace_back(1, 2);
+    polygon.emplace_back(1, 1);
 
     PTR(polygon.cbegin(), polygon.cend(), result);
 
@@ -91,7 +92,7 @@ void Test_PTR_Fail_case()
     std::vector< Coor<int> > polygon;
     std::vector< Rect<int> > result;
 
-/*  Test case 1 which PTR algorithm fails
+    // Now Pass! Test case 1 which PTR algorithm fails
     polygon.emplace_back(1, 1);
     polygon.emplace_back(4, 1);
     polygon.emplace_back(4, 2);
@@ -104,7 +105,8 @@ void Test_PTR_Fail_case()
     polygon.emplace_back(2, 3);
     polygon.emplace_back(2, 4);
     polygon.emplace_back(1, 4);
-*/
+    polygon.emplace_back(1, 1);
+
 /*
     // Test case 2 which PTR algorithm fails
     polygon.emplace_back(2, 1);
@@ -119,7 +121,11 @@ void Test_PTR_Fail_case()
     polygon.emplace_back(1, 4);
     polygon.emplace_back(1, 3);
     polygon.emplace_back(2, 3);
+    polygon.emplace_back(2, 1);
 */
+
+/*
+    // Pass
     polygon.emplace_back(308, 2);
     polygon.emplace_back(308, 66);
     polygon.emplace_back(175, 66);
@@ -141,6 +147,27 @@ void Test_PTR_Fail_case()
     polygon.emplace_back(314, 66);
     polygon.emplace_back(314, 2);
     polygon.emplace_back(308, 2);
+*/
+
+/*
+    polygon.emplace_back(5, 98);
+    polygon.emplace_back(5, 146);
+    polygon.emplace_back(228, 146);
+    polygon.emplace_back(228, 242);
+    polygon.emplace_back(264, 242);
+    polygon.emplace_back(264, 322);
+    polygon.emplace_back(485, 322);
+    polygon.emplace_back(485, 306);
+    polygon.emplace_back(297, 306);
+    polygon.emplace_back(297, 82);
+    polygon.emplace_back(485, 82);
+    polygon.emplace_back(485, 322);
+    polygon.emplace_back(537, 322);
+    polygon.emplace_back(537, 82);
+    polygon.emplace_back(297, 82);
+    polygon.emplace_back(297, 98);
+    polygon.emplace_back(5, 98);
+*/
 
 #if I_PTR_test
     std::cout << "I_PTR Algorithm Result:\n" << std::endl;
