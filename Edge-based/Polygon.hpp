@@ -6,6 +6,10 @@
 #include <iostream>
 #include <algorithm> 
 
+#define OVERLAP_Full    0
+#define OVERLAP_Partial 1
+#define OVERLAP_None    2
+
 template <typename T>
 struct edge
 {
@@ -14,88 +18,99 @@ struct edge
 };
 
 template <typename T>
-void edge_complement(edge<T> e1, edge<T> e2, std::vector< edge<T> >& complement_edges)
-{
-    if(e1.Coor_pair.first == e2.Coor_pair.first)
-    {
-        complement_edges.push_back(edge<T>(e1.Coor_pair.second, e2.Coor_pair.second));
-    }
-    else if(e1.Coor_pair.first == e2.Coor_pair.second)
-    {
-        complement_edges.push_back(edge<T>(e1.Coor_pair.second, e2.Coor_pair.first));
-    }
-    else if(e1.Coor_pair.second == e2.Coor_pair.first)
-    {
-        complement_edges.push_back(edge<T>(e1.Coor_pair.first, e2.Coor_pair.second));
-    }
-    else if(e1.Coor_pair.second == e2.Coor_pair.second)
-    {
-        complement_edges.push_back(edge<T>(e1.Coor_pair.first, e2.Coor_pair.first));
-    }
-    else
-    {
-        
-        if(
-            //check the horizontal edge
-            e1.Coor_pair.first.getY() == e1.Coor_pair.second.getY() &&
-            e2.Coor_pair.first.getY() == e2.Coor_pair.second.getY()
-        )
-        {
-            // sort the two edges —— first are the leftmost points
-            if(e1.Coor_pair.first.getX() > e1.Coor_pair.second.getX())
-            {
-                std::swap(e1.Coor_pair.first, e1.Coor_pair.second);
-            }
-            if(e2.Coor_pair.first.getX() > e2.Coor_pair.second.getX())
-            {
-                std::swap(e2.Coor_pair.first, e2.Coor_pair.second);
-            }
-            // check if the two edges are intersected
-            if(e1.Coor_pair.second.getX() < e2.Coor_pair.first.getX() || e2.Coor_pair.second.getX() < e1.Coor_pair.first.getX())
-            {
-                //throw std::invalid_argument("The two edges are not connected");
-                complement_edges.push_back(e1);
-                complement_edges.push_back(e2);
-            }
-            else
-            {
-                //complement_edges.push_back(edge<T>(e1.Coor_pair.first, e2.Coor_pair.first));
-                //complement_edges.push_back(edge<T>(e1.Coor_pair.second, e2.Coor_pair.second));
-            }
-        }
-        else if (
-            //check the vertical edge
-            e1.Coor_pair.first.getX() == e1.Coor_pair.second.getX() &&
-            e2.Coor_pair.first.getX() == e2.Coor_pair.second.getX()
-        )
-        {
-            // sort the two edges —— first are the bottommost points
-            if(e1.Coor_pair.first.getY() > e1.Coor_pair.second.getY())
-            {
-                std::swap(e1.Coor_pair.first, e1.Coor_pair.second);
-            }
-            if(e2.Coor_pair.first.getY() > e2.Coor_pair.second.getY())
-            {
-                std::swap(e2.Coor_pair.first, e2.Coor_pair.second);
-            }
-            // check if the two edges are intersected
-            if(e1.Coor_pair.second.getY() < e2.Coor_pair.first.getY() || e2.Coor_pair.second.getY() < e1.Coor_pair.first.getY())
-            {
-                //throw std::invalid_argument("The two edges are not connected");
-                //complement_edges.push_back(e1);
-                //complement_edges.push_back(e2);
-            }
-            else
-            {
-                complement_edges.push_back(edge<T>(e1.Coor_pair.first, e2.Coor_pair.first));
-                complement_edges.push_back(edge<T>(e1.Coor_pair.second, e2.Coor_pair.second));
-            }
-        }
-        else
-        {
-            throw std::invalid_argument("The two edges are not connected");
-        }
+int after_overlapped(edge<T>& e1, edge<T>& e2){
+    // remove the overlapped part of e1 and e2 from e1 and e2
 
+    // if e1, e2 are horizontal edges
+    if(e1.Coor_pair.first.getY() == e1.Coor_pair.second.getY() && 
+        e2.Coor_pair.first.getY() == e2.Coor_pair.second.getY()){
+        // sort the e1 and e2, so that first point of e1/e2 is the leftmost point
+        if(e1.Coor_pair.first.getX() > e1.Coor_pair.second.getX()){
+            std::swap(e1.Coor_pair.first, e1.Coor_pair.second);
+        }
+        if(e2.Coor_pair.first.getX() > e2.Coor_pair.second.getX()){
+            std::swap(e2.Coor_pair.first, e2.Coor_pair.second);
+        }
+        //check if e1 and e2 overlap
+        if(e1.Coor_pair.second.getX() < e2.Coor_pair.first.getX() || 
+            e2.Coor_pair.second.getX() < e1.Coor_pair.first.getX()){
+            //do nothing
+            return OVERLAP_None;
+        }
+        else{
+            // if e1 and e2 overlap, remove the overlapped part
+            Coor<T> tmp = e1.Coor_pair.second;
+            e1.Coor_pair.second = e2.Coor_pair.first;
+            e2.Coor_pair.first = tmp;
+
+            if(e1.Coor_pair.first == e1.Coor_pair.second){
+                return OVERLAP_Full;
+            }
+            else{
+                return OVERLAP_Partial;
+            }
+        }
+    }
+    // if e1, e2 are vertical edges
+    else if(e1.Coor_pair.first.getX() == e1.Coor_pair.second.getX() && 
+        e2.Coor_pair.first.getX() == e2.Coor_pair.second.getX()){
+        // sort the e1 and e2, so that first point of e1/e2 is the bottommost point
+        if(e1.Coor_pair.first.getY() > e1.Coor_pair.second.getY()){
+            std::swap(e1.Coor_pair.first, e1.Coor_pair.second);
+        }
+        if(e2.Coor_pair.first.getY() > e2.Coor_pair.second.getY()){
+            std::swap(e2.Coor_pair.first, e2.Coor_pair.second);
+        }
+        //check if e1 and e2 overlap
+        if(e1.Coor_pair.second.getY() < e2.Coor_pair.first.getY() || 
+            e2.Coor_pair.second.getY() < e1.Coor_pair.first.getY()){
+            //do nothing
+            return OVERLAP_None;
+        }
+        else{
+            // if e1 and e2 overlap, remove the overlapped part
+            Coor<T> tmp = e1.Coor_pair.second;
+            e1.Coor_pair.second = e2.Coor_pair.first;
+            e2.Coor_pair.first = tmp;
+
+            if(e1.Coor_pair.first == e1.Coor_pair.second){
+                return OVERLAP_Full;
+            }
+            else{
+                return OVERLAP_Partial;
+            }
+        }
+    }
+}
+
+template <typename T>
+void edge_list_edge_complement(std::vector< edge<T> >& edge_list, 
+                    edge<T> e2)
+{
+    // If the e2 overlap with some edges of edge_list, the overlapped parts of these edges should be removed, and the remaining parts (not exist in the edge_list) of e2 should be added into the edge_list.
+    for(auto iter = edge_list.begin(); iter != edge_list.end(); )
+    {
+        // calculate the overlapped part of e2 and *iter
+        edge<T> e1 = *iter;
+        int flag = after_overlapped(e1, e2);
+        if(flag == OVERLAP_Full){
+            // remove the overlapped edge
+            iter = edge_list.erase(iter);
+            break;
+        }
+        else if(flag == OVERLAP_Partial){
+            // remove the overlapped edge
+            iter = edge_list.erase(iter);
+            // add the remaining part of e1 into the edge_list
+            edge_list.push_back(e1);
+        }
+        else if(iter == edge_list.end() && flag == OVERLAP_None){
+            // add the e2 into the edge_list
+            edge_list.push_back(e2);
+        }
+        else{
+            ++iter;
+        }
     }
 }
 
@@ -128,200 +143,13 @@ void Polygon_edge_collection<T>::edges_2_vertices()
 template <typename T>
 void Polygon_edge_collection<T>::add_horizontal_edge(edge<T> e)
 {
-    // chek if the edge is horizontal
-    if(e.Coor_pair.first.getY() != e.Coor_pair.second.getY())
-    {
-        throw std::invalid_argument("The edge is not horizontal");
-    }
 
-    T add_edge_Y = e.Coor_pair.first.getY();
-
-    // collect and remove all the horizontal edges in the polygon
-    std::vector< edge<T> > horizontal_edges_in_polygon;
-    for(auto iter = edges.begin(); iter != edges.end();){
-        if(iter->Coor_pair.first.getY() == add_edge_Y && iter->Coor_pair.second.getY() == add_edge_Y)
-        {
-            horizontal_edges_in_polygon.push_back(*iter);
-            iter = edges.erase(iter);
-        }
-        else{
-            iter++;
-        }
-    }
-    // sort the horizontal edges according to the min x-coordinate of first and second point
-    std::sort(horizontal_edges_in_polygon.begin(), horizontal_edges_in_polygon.end(), 
-        [](const edge<T>& a, const edge<T>& b){
-            return std::min(a.Coor_pair.first.getX(), a.Coor_pair.second.getX()) < std::min(b.Coor_pair.first.getX(), b.Coor_pair.second.getX());
-        });
-
-#if 1
-    std::cout << "e is " << e.Coor_pair.first << " " << e.Coor_pair.second << std::endl;
-    for(auto iter = horizontal_edges_in_polygon.begin(); iter != horizontal_edges_in_polygon.end(); iter++)
-    {
-        std::cout << "horizontal_edges_in_polygon is " << iter->Coor_pair.first << " " << iter->Coor_pair.second << std::endl;
-    }
-#endif
-
-    // complement the horizontal edge with the edges in the polygon
-    std::vector< edge<T> > operation_edges;
-    operation_edges.push_back(e);
-    
-    for(auto& horizontal_edge : horizontal_edges_in_polygon)
-    {
-        if(operation_edges.size() == 0)
-        {
-#if 1
-            std::cout << "added edge is " << horizontal_edge.Coor_pair.first << " " << horizontal_edge.Coor_pair.second << std::endl;
-#endif
-            operation_edges.push_back(horizontal_edge);
-            continue;
-        }
-
-        std::vector< edge<T> > complement_edges_collection;
-        
-        for(auto iter = operation_edges.begin(); iter != operation_edges.end();){
-            std::vector< edge<T> > complement_edges;
-            edge_complement(*iter, horizontal_edge, complement_edges);
-
-#if 1
-            std::cout << "iter is " << iter->Coor_pair.first << " " << iter->Coor_pair.second << std::endl;
-            std::cout << "horizontal_edge of operation is " << horizontal_edge.Coor_pair.first << " " << horizontal_edge.Coor_pair.second << std::endl;
-            for(auto iter = complement_edges.begin(); iter != complement_edges.end(); iter++)
-            {
-                std::cout << "complement_edges is " << iter->Coor_pair.first << " " << iter->Coor_pair.second << std::endl;
-            }
-            std::cout << "------" << std::endl;
-#endif
-
-            if(complement_edges.size() == 0){iter++;}
-            else
-            {
-                complement_edges_collection.insert(complement_edges_collection.end(), complement_edges.begin(), complement_edges.end());
-                iter = operation_edges.erase(iter);
-            }
-        }
-
-        for(auto& complement_edge : complement_edges_collection)
-        {
-            // check the edge is not a ponit
-            if(complement_edge.Coor_pair.first != complement_edge.Coor_pair.second)
-            {
-                operation_edges.push_back(complement_edge);
-            }
-        }
-        complement_edges_collection.clear();
-    }
-
-    // add the complemented edges back to the polygon
-    for(auto& edge : operation_edges)
-    {
-#if 1
-        std::cout << "edge is " << edge.Coor_pair.first << " " << edge.Coor_pair.second << std::endl;
-#endif
-        edges.push_back(edge);
-    }
-    std::cout << "-------------------------------------------" << std::endl;
 }
 
 template <typename T>
 void Polygon_edge_collection<T>::add_vertical_edge(edge<T> e)
 {
-    // chek if the edge is vertical
-    if(e.Coor_pair.first.getX() != e.Coor_pair.second.getX())
-    {
-        throw std::invalid_argument("The edge is not vertical");
-    }
 
-    T add_edge_X = e.Coor_pair.first.getX();
-
-    // collect and remove all the vertical edges in the polygon
-    std::vector< edge<T> > vertical_edges_in_polygon;
-    for(auto iter = edges.begin(); iter != edges.end();){
-        if(iter->Coor_pair.first.getX() == add_edge_X && iter->Coor_pair.second.getX() == add_edge_X)
-        {
-            vertical_edges_in_polygon.push_back(*iter);
-            iter = edges.erase(iter);
-        }
-        else{
-            iter++;
-        }
-    }
-    // sort the horizontal edges according to the min y-coordinate of first and second point
-    std::sort(vertical_edges_in_polygon.begin(), vertical_edges_in_polygon.end(), 
-        [](const edge<T>& a, const edge<T>& b){
-            return std::min(a.Coor_pair.first.getY(), a.Coor_pair.second.getY()) < std::min(b.Coor_pair.first.getY(), b.Coor_pair.second.getY());
-        });
-
-#if 1
-    std::cout << "e is " << e.Coor_pair.first << " " << e.Coor_pair.second << std::endl;
-    for(auto iter = vertical_edges_in_polygon.begin(); iter != vertical_edges_in_polygon.end(); iter++)
-    {
-        std::cout << "vertical_edges_in_polygon is " << iter->Coor_pair.first << " " << iter->Coor_pair.second << std::endl;
-    }
-#endif
-
-    // complement the vertical edge with the edges in the polygon
-    std::vector< edge<T> > operation_edges;
-    operation_edges.push_back(e);
-    
-    for(auto vertical_edge : vertical_edges_in_polygon)
-    {
-        // if operation_edges is empty, then add remaining vertical edges to the operation_edges
-        if(operation_edges.size() == 0)
-        {
-#if 1
-            std::cout << "added edge is " << vertical_edge.Coor_pair.first << " " << vertical_edge.Coor_pair.second << std::endl;
-#endif
-            operation_edges.push_back(vertical_edge);
-            continue;
-        }
-
-        std::vector< edge<T> > complement_edges_collection;
-        
-        for(auto iter = operation_edges.begin(); iter != operation_edges.end();){
-            std::vector< edge<T> > complement_edges;
-            edge_complement(*iter, vertical_edge, complement_edges);
-
-#if 1
-            std::cout << "iter is " << iter->Coor_pair.first << " " << iter->Coor_pair.second << std::endl;
-            std::cout << "vertical_edge of operation is " << vertical_edge.Coor_pair.first << " " << vertical_edge.Coor_pair.second << std::endl;
-            for(auto iter = complement_edges.begin(); iter != complement_edges.end(); iter++)
-            {
-                std::cout << "complement_edges is " << iter->Coor_pair.first << " " << iter->Coor_pair.second << std::endl;
-            }
-            std::cout << "------" << std::endl;
-#endif
-
-
-            if(complement_edges.size() == 0){iter++;}
-            else
-            {
-                complement_edges_collection.insert(complement_edges_collection.end(), complement_edges.begin(), complement_edges.end());
-                iter = operation_edges.erase(iter);
-            }
-        }
-
-        for(auto& complement_edge : complement_edges_collection)
-        {
-            // check the edge is not a ponit
-            if(complement_edge.Coor_pair.first != complement_edge.Coor_pair.second)
-            {
-                operation_edges.push_back(complement_edge);
-            }
-        }
-        complement_edges_collection.clear();
-    }
-
-    // add the complemented edges back to the polygon
-
-    for(auto& edge : operation_edges)
-    {
-#if 1
-        std::cout << "edge is " << edge.Coor_pair.first << " " << edge.Coor_pair.second << std::endl;
-#endif
-        edges.push_back(edge);
-    }
-    std::cout << "-------------------------------------------" << std::endl;
 }
 
 #endif
