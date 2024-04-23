@@ -72,7 +72,7 @@ void Decomposition(
 
 
 template <typename T>
-static auto findCoorTuple_Refactor(Polygon<T>& polygon)
+static auto findCoorTuple_Refactor(Polygon<T>& polxygon)
     -> std::tuple<Coor<T>, Coor<T>, Coor<T>>
 {   
     Polygon<T> poly_copy = polygon;

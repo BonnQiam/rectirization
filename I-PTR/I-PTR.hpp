@@ -8,7 +8,7 @@
 #define debug_IPTR 1
 
 template <typename T>
-static auto findCoorTuple__4_I_PTR(std::list< Coor<T> >& polygon) 
+static auto findCoorTuple_4_I_PTR(std::list< Coor<T> >& polygon) 
     -> std::tuple<typename std::list< Coor<T> >::iterator, 
                     typename std::list< Coor<T> >::iterator, 
                     typename std::list< Coor<T> >::iterator>;
@@ -85,7 +85,7 @@ static auto findCoorTuple_4_I_PTR(std::list< Coor<T> >& polygon)
         int count = 0;
         for(auto i=polygon.begin(); i!=polygon.end(); ++i){
             if(*i == *Pk){count++;}
-        }
+        } 
         if(count == 2){
             polygon.remove(*Pk);
             continue;
@@ -410,4 +410,4 @@ static void updatePolygon_4_I_PTR(std::list< Coor<T> >& polygon,
             }                
         }
     }
-}
+ }
