@@ -92,8 +92,8 @@ void Test_PTR_Fail_case()
     std::vector< Coor<int> > polygon;
     std::vector< Rect<int> > result;
 
-#if 1
-    // Now Pass! Test case 1 which PTR algorithm fails
+#if 0
+    // Test case 1 which PTR algorithm fails
     polygon.emplace_back(1, 1);
     polygon.emplace_back(4, 1);
     polygon.emplace_back(4, 2);
@@ -126,7 +126,7 @@ void Test_PTR_Fail_case()
     //polygon.emplace_back(2, 1);
 #endif
 
-#if 0
+#if 1
     polygon.emplace_back(308, 2);
     polygon.emplace_back(308, 66);
     polygon.emplace_back(175, 66);

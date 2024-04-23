@@ -62,9 +62,17 @@ static auto findCoorTuple_4_I_PTR(std::list< Coor<T> >& polygon)
                     typename std::list< Coor<T> >::iterator>
 {   
     while(1){
-        // find Pk: the bottom and the left-most coordinate
+        // find Pk: the bottom and the left-most coordinate except P0
+        auto P_0 = polygon.end();
         const auto Pk = std::min_element(polygon.begin(), polygon.end(), 
-            [](const auto& lhs, const auto& rhs) -> bool {
+            [&P_0](const auto& lhs, const auto& rhs) -> bool {
+                    // skip the element P0
+                    if (lhs == (*P_0)) { 
+                        return false; 
+                        }
+                    else if (rhs == (*P_0)) { 
+                        return true; 
+                        }
                     if (lhs.getY() != rhs.getY()) { 
                         return (lhs.getY() < rhs.getY()); 
                         }
@@ -77,11 +85,17 @@ static auto findCoorTuple_4_I_PTR(std::list< Coor<T> >& polygon)
         int count = 0;
         for(auto i=polygon.begin(); i!=polygon.end(); ++i){
             if(*i == *Pk){count++;}
-            if(count > 1){
-                polygon.erase(i);
-            }
         }
-
+        if(count == 2){
+            polygon.remove(*Pk);
+            continue;
+        }
+        else if (count > 2)
+        {
+            P_0 = Pk;
+            continue;
+        }
+        
         // find Pl: the bottom and the left-most coordinate except Pk
         const auto Pl = std::min_element(polygon.begin(), polygon.end(), 
             [&Pk](const auto& lhs, const auto& rhs) -> bool {
@@ -162,6 +176,8 @@ static auto findCoorTuple_4_I_PTR(std::list< Coor<T> >& polygon)
                     return true;
                 }
             );
+
+#if 0
         if(Pm->getY() == Pk->getY()){
             polygon.erase(Pk);
             continue;
@@ -169,6 +185,8 @@ static auto findCoorTuple_4_I_PTR(std::list< Coor<T> >& polygon)
         else{
             return {Pk, Pl, Pm};
         }
+#endif 
+        return {Pk, Pl, Pm};
     }
 }
 
@@ -192,39 +210,37 @@ static void updatePolygon_4_I_PTR(std::list< Coor<T> >& polygon,
     bool Pk_Pl;
     
     while(iter != polygon.end()) {
-        Coor<T> iter_last = (iter == polygon.begin()) ? polygon.back() : *(std::prev(iter));
-        
-        Coor<T> iter_next = (std::next(iter) == polygon.end()) ? polygon.front() : *(std::next(iter));
+        auto iter_next = (std::next(iter) == polygon.end()) ? polygon.begin() : (std::next(iter));
+        auto iter_last = (iter == polygon.begin()) ? (std::prev(polygon.end())) : (std::prev(iter));
 
         if(*iter == upr) {
             insert_upr = false;
             // check special case
             if(
-                ((iter->getY() - iter_last.getY()) < 0 && (iter_next.getX()-iter->getX()) > 0) ||
-                ((iter->getX() - iter_last.getX()) < 0 && (iter_next.getY()-iter->getY()) > 0)
+                ((iter->getY() - iter_last->getY()) < 0 && (iter_next->getX()-iter->getX()) > 0) ||
+                ((iter->getX() - iter_last->getX()) < 0 && (iter_next->getY()-iter->getY()) > 0)
             ){insert_upr = true;}
         }
         else if(*iter == upl){
             insert_upl = false;
             // check special case
             if(
-                ((iter->getX() - iter_last.getX()) > 0 && (iter_next.getY()-iter->getY()) > 0) ||
-                ((iter->getY() - iter_last.getY()) < 0 && (iter_next.getX()-iter->getX()) < 0)
+                ((iter->getX() - iter_last->getX()) > 0 && (iter_next->getY()-iter->getY()) > 0) ||
+                ((iter->getY() - iter_last->getY()) < 0 && (iter_next->getX()-iter->getX()) < 0)
             ){insert_upl = true;}            
         }
         else if(*iter == Pk){
             if(
-                ((iter->getX() - iter_last.getX()) > 0 && (iter_next.getY()-iter->getY()) > 0) ||
-                ((iter->getY() - iter_last.getY()) < 0 && (iter_next.getX()-iter->getX()) < 0)
+                ((iter->getX() - iter_last->getX()) > 0 && (iter_next->getY()-iter->getY()) > 0) ||
+                ((iter->getY() - iter_last->getY()) < 0 && (iter_next->getX()-iter->getX()) < 0)
             ){remove_Pk = false;}
         }
         else if(*iter == Pl){
             if(
-                ((iter->getX() - iter_last.getX()) < 0 && (iter_next.getY()-iter->getY()) > 0) ||
-                ((iter->getY() - iter_last.getY()) < 0 && (iter_next.getX()-iter->getX()) > 0)
+                ((iter->getX() - iter_last->getX()) < 0 && (iter_next->getY()-iter->getY()) > 0) ||
+                ((iter->getY() - iter_last->getY()) < 0 && (iter_next->getX()-iter->getX()) > 0)
             ){remove_Pl = false;}
         }
-
         if(*iter == Pk && *iter_next == Pl) {
             iter_Pk = iter;
             iter_Pl = iter_next;
@@ -247,22 +263,29 @@ static void updatePolygon_4_I_PTR(std::list< Coor<T> >& polygon,
 #endif
 
     if(Pk_Pl){
+#if debug_IPTR
+        std::cout << "Case 1: Pk-Pl" << std::endl;
+#endif
         if(insert_upl && insert_upr){
-            iter_pl = polygon.insert(polygon.insert(iter_Pl, upr), upl)
-            iter_pl = ((iter_Pl+2) == polygon.end()) ? polygon.begin() : (iter_Pl+2);
+#if debug_IPTR
+            std::cout << "Insert Pk and Pl" << std::endl;
+#endif
+            iter_Pl = polygon.insert(polygon.insert(iter_Pl, upr), upl);
+            iter_Pl = (std::next(iter_Pl) == polygon.end()) ? polygon.begin() : (std::next(iter_Pl));
+            iter_Pl = (std::next(iter_Pl) == polygon.end()) ? polygon.begin() : (std::next(iter_Pl));
             
             if(remove_Pl){polygon.erase(iter_Pl);}
             if(remove_Pk){polygon.erase(iter_Pk);}
         }
         else if(insert_upl && !insert_upr){
             iter_Pl = polygon.insert(iter_Pl, upl);
-            iter_Pl = ((iter+1) == polygon.end()) ? polygon.begin() : (iter+1);
+            iter_Pl = (std::next(iter_Pl) == polygon.end()) ? polygon.begin() : (std::next(iter_Pl));
             
             if(remove_Pl){iter_Pl = polygon.erase(iter_Pl);}
             if(remove_Pk){iter_Pk = polygon.erase(iter_Pk);}
             
             // remove upr
-            auto iter_upr = ((iter_Pl+1) == polygon.end()) ? polygon.begin() : (iter_Pl+1);
+            auto iter_upr = (std::next(iter_Pl)==polygon.end()) ? polygon.begin() : (std::next(iter_Pl));
 #if debug_IPTR
             std::cout << "iter_upr == upr: " << (*iter_upr == upr) << std::endl;
 #endif
@@ -270,44 +293,121 @@ static void updatePolygon_4_I_PTR(std::list< Coor<T> >& polygon,
         }
         else if(insert_upr && !insert_upl){
             iter_Pl = polygon.insert(iter_Pl, upr);
-            iter_Pl = ((iter+1) == polygon.end()) ? polygon.begin() : (iter+1);
+            iter_Pl = (std::next(iter_Pl) == polygon.end()) ? polygon.begin() : (std::next(iter_Pl));
 
             if(remove_Pl){iter_Pl = polygon.erase(iter_Pl);}
             if(remove_Pk){iter_Pk = polygon.erase(iter_Pk);}
 
             // remove upl
-            auto iter_upl = (iter_Pk == polygon.begin()) ? (polygon.end()-1) : (iter_Pk-1);
+            auto iter_upl = (iter_Pk == polygon.begin()) ? std::prev(polygon.end()) : std::prev(iter_Pk);
 #if debug_IPTR
             std::cout << "iter_upl == upl: " << (*iter_upl == upl) << std::endl;
 #endif
             polygon.erase(iter_upl);
         }
         else{
-            if(remove_Pl){iter_Pl = polygon.erase(iter_Pl);}
-            if(remove_Pk){iter_Pk = polygon.erase(iter_Pk);}
-
-            auto iter_Pl_next = ((iter_Pl+1) == polygon.end()) ? polygon.begin() : (iter_Pl+1);
-            auto iter_Pk_last = (iter_Pk == polygon.begin()) ? (polygon.end()-1) : (iter_Pk-1);
+#if debug_IPTR
+            std::cout << "Remove Pk and Pl" << std::endl;
+#endif
+            auto iter_Pl_next = (std::next(iter_Pl) == polygon.end()) ? polygon.begin() : (std::next(iter_Pl));
+            if(remove_Pl){
+                iter_Pl_next = polygon.erase(iter_Pl);
+            }
+            
+            if(remove_Pk){
+                iter_Pk = polygon.erase(iter_Pk);
+            }
+            auto iter_Pk_last = (iter_Pk == polygon.begin()) ? std::prev(polygon.end()) : std::prev(iter_Pk);
 
             if(*iter_Pl_next == upr && *iter_Pk_last == upl){
+                std::cout << "1" << std::endl;
                 polygon.erase(iter_Pl_next);
                 polygon.erase(iter_Pk_last);
             }
             else if(*iter_Pl_next == upr && !(*iter_Pk_last == upl)){
+                std::cout << "2" << std::endl;
                 iter_Pl_next = polygon.erase(iter_Pl_next);// remove upr
                 polygon.erase(iter_Pl_next); // remove upl
             }
             else if(!(*iter_Pl_next == upr) && *iter_Pk_last == upl){
-                //wait
-            }
-            else{
-                //wait
-            }
-                
+                std::cout << "3" << std::endl;
+                auto iter_Pk_last_last = (iter_Pk_last == polygon.begin()) ? std::prev(polygon.end()) : std::prev(iter_Pk_last);
+                polygon.erase(iter_Pk_last);
+                polygon.erase(iter_Pk_last_last);
+            }                
         }
     }
-    
+    else{
+#if debug_IPTR
+        std::cout << "Case 2: Pl-Pk" << std::endl;
+#endif
+        if(insert_upl && insert_upr){
+#if debug_IPTR
+            std::cout << "Insert Pk and Pl" << std::endl;
+#endif
+            iter_Pk = polygon.insert(polygon.insert(iter_Pk, upl), upr);
+            iter_Pk = (std::next(iter_Pk) == polygon.end()) ? polygon.begin() : (std::next(iter_Pk));
+            iter_Pk = (std::next(iter_Pk) == polygon.end()) ? polygon.begin() : (std::next(iter_Pk));
 
-    
+            if(remove_Pk){polygon.erase(iter_Pk);}
+            if(remove_Pl){polygon.erase(iter_Pl);}
+        }
+        else if(insert_upl && !insert_upr){
+            iter_Pk = polygon.insert(iter_Pk, upl);
+            iter_Pk = (std::next(iter_Pk) == polygon.end()) ? polygon.begin() : (std::next(iter_Pk));
 
+            if(remove_Pk){iter_Pk = polygon.erase(iter_Pk);}
+            if(remove_Pl){iter_Pl = polygon.erase(iter_Pl);}
+
+            // remove upr
+            auto iter_upr = (iter_Pl == polygon.begin()) ? std::prev(polygon.end()) : std::prev(iter_Pl);
+#if debug_IPTR
+            std::cout << "iter_upr == upr: " << (*iter_upr == upr) << std::endl;
+#endif
+            polygon.erase(iter_upr);
+        }
+        else if(insert_upr && !insert_upl){
+            iter_Pk = polygon.insert(iter_Pk, upr);
+            iter_Pk = (std::next(iter_Pk) == polygon.end()) ? polygon.begin() : (std::next(iter_Pk));
+
+            if(remove_Pk){iter_Pk = polygon.erase(iter_Pk);}
+            if(remove_Pl){iter_Pl = polygon.erase(iter_Pl);}
+
+            // remove upl
+            auto iter_upl = (std::next(iter_Pk) == polygon.end()) ? polygon.begin() : (std::next(iter_Pk));
+#if debug_IPTR
+            std::cout << "iter_upl == upl: " << (*iter_upl == upl) << std::endl;
+#endif
+            polygon.erase(iter_upl);
+        }
+        else{
+#if debug_IPTR
+            std::cout << "Remove Pk and Pl" << std::endl;
+#endif
+            auto iter_Pk_next = (std::next(iter_Pk) == polygon.end()) ? polygon.begin() : (std::next(iter_Pk));
+            if(remove_Pk){
+                iter_Pk_next = polygon.erase(iter_Pk);
+            }
+            
+            if(remove_Pl){iter_Pl = polygon.erase(iter_Pl);}
+            auto iter_Pl_last = (iter_Pl == polygon.begin()) ? std::prev(polygon.end()) : std::prev(iter_Pl);
+
+            if(*iter_Pk_next == upl && *iter_Pl_last == upr){
+                std::cout << "1" << std::endl;
+                polygon.erase(iter_Pk_next);
+                polygon.erase(iter_Pl_last);
+            }
+            else if(*iter_Pk_next == upl && !(*iter_Pl_last == upr)){
+                std::cout << "2" << std::endl;
+                iter_Pk_next = polygon.erase(iter_Pk_next);// remove upl
+                polygon.erase(iter_Pk_next); // remove upr
+            }
+            else if(!(*iter_Pk_next == upr) && *iter_Pl_last == upl){
+                std::cout << "3" << std::endl;
+                auto iter_Pl_last_last = (iter_Pl_last == polygon.begin()) ? std::prev(polygon.end()) : std::prev(iter_Pl_last);
+                polygon.erase(iter_Pl_last);
+                polygon.erase(iter_Pl_last_last);
+            }                
+        }
+    }
 }
