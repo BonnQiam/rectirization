@@ -1,6 +1,10 @@
 #ifndef Decomposition_hpp
 #define Decomposition_hpp
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 #include <vector>
 #include <tuple>
 #include <algorithm>
@@ -30,13 +34,28 @@ void Edge_based_decomposition(const const_iterator& first, const const_iterator&
     }
     Polygon_edges.edges_2_vertices();
 
-    while (!Polygon_edges.edges.empty())
-    //for(int i=0; i<4; ++i)
+#if 0
+    //display the edges
+    std::cout << "Edges: " << std::endl;
+    for(auto iter = Polygon_edges.edges.begin(); iter != Polygon_edges.edges.end(); iter++)
+    {
+        std::cout << iter->Coor_pair.first << " " << iter->Coor_pair.second << std::endl;
+    }   
+#endif
+
+    while (Polygon_edges.edges.size()>1)
+    //for(int i=0; i<2500; ++i)
     {
         const auto& coor_tuple = findCoorTuple_4_I_PTR(Polygon_edges.vertices);
         const auto Pk = *(std::get<0>(coor_tuple));
         const auto Pl = *(std::get<1>(coor_tuple));
         const auto Pm = *(std::get<2>(coor_tuple));
+
+//        std::cout << "i: " << i << std::endl;
+        std::cout << "Pk: " << Pk << std::endl;
+        std::cout << "Pl: " << Pl << std::endl;
+        std::cout << "Pm: " << Pm << std::endl;
+        std::cout << "----------------------------------------------------------" << std::endl;
 
         result.emplace_back(Pk.getX(), 
                                 Pk.getY(), 
@@ -45,23 +64,43 @@ void Edge_based_decomposition(const const_iterator& first, const const_iterator&
 
         // Upl and Upr
         Coor<T> upl(Pk.getX(), Pm.getY()), upr(Pl.getX(), Pm.getY());
-
-        std::cout << "Upl: " << upl << std::endl;
-        std::cout << "Upr: " << upr << std::endl;
-        std::cout << "Pl: " << Pl << std::endl;
-        std::cout << "Pk: " << Pk << std::endl;
-        std::cout << "-------------------------------------------------------" << std::endl;
+        
         // edges of the rectangle
         edge<T> e1(Pk, upl), e2(upl, upr), e3(upr, Pl), e4(Pl, Pk);
         // add to the Polygon_edges.edges
-        Polygon_edges.add_vertical_edge(e1);
-        Polygon_edges.add_horizontal_edge(e2);
-        Polygon_edges.add_vertical_edge(e3);
-        std::cout << "e4" << std::endl;
-        Polygon_edges.add_horizontal_edge(e4);
 
+        edge_list_edge_complement<T>(Polygon_edges.edges, e1, VERTICAL);
+        edge_list_edge_complement<T>(Polygon_edges.edges, e2, HORIZONTAL);
+        edge_list_edge_complement<T>(Polygon_edges.edges, e3, VERTICAL);
+        edge_list_edge_complement<T>(Polygon_edges.edges, e4, HORIZONTAL);
+#if 0
+        if(i > 16){
+            edge_list_edge_complement<T>(Polygon_edges.edges, e1, VERTICAL);
+            edge_list_edge_complement<T>(Polygon_edges.edges, e2, HORIZONTAL);
+            edge_list_edge_complement<T>(Polygon_edges.edges, e3, VERTICAL);
+            edge_list_edge_complement<T>(Polygon_edges.edges, e4, HORIZONTAL);
+        }
+        else{
+            edge_list_edge_complement<T>(Polygon_edges.edges, e1, VERTICAL);
+            edge_list_edge_complement<T>(Polygon_edges.edges, e2, HORIZONTAL);
+            edge_list_edge_complement<T>(Polygon_edges.edges, e3, VERTICAL);
+            edge_list_edge_complement<T>(Polygon_edges.edges, e4, HORIZONTAL);
+        }
+#endif
         Polygon_edges.edges_2_vertices();
 
+
+        //output to Edge.txt
+        std::ofstream outfile("Edge.txt");
+        //clear the file
+        outfile.clear();
+        for(auto iter = Polygon_edges.edges.begin(); iter != Polygon_edges.edges.end(); iter++)
+        {
+            outfile << iter->Coor_pair.first << " " << iter->Coor_pair.second << std::endl;
+        }
+        outfile.close();
+
+#if 0
         //display the edges
         std::cout << "Edges: " << std::endl;
         for(auto iter = Polygon_edges.edges.begin(); iter != Polygon_edges.edges.end(); iter++)
@@ -76,6 +115,7 @@ void Edge_based_decomposition(const const_iterator& first, const const_iterator&
         }
 
         std::cout << "----------------------------------------------------------" << std::endl;
+#endif
     }   
 }
 
@@ -126,14 +166,12 @@ static auto findCoorTuple_4_I_PTR(std::vector< Coor<T> >& vertices)
                 // Pk.getX() <= x < Pl.getX() && Pk.getY() < y
                 if ((lhs.getY() <= Pk->getY()) || 
                     (lhs.getX() < Pk->getX()) || 
-                    //(lhs.getX() >= Pl->getX())) {
-                    (lhs.getX() > Pl->getX())) { 
+                    (lhs.getX() >= Pl->getX())) {
                         return false; 
                     }
                 else if ((rhs.getY() <= Pk->getY()) || 
                         (rhs.getX() < Pk->getX()) || 
-                        //(rhs.getX() >= Pl->getX())) { 
-                        (rhs.getX() > Pl->getX())) {
+                        (rhs.getX() >= Pl->getX())) { 
                             return true; 
                     }
                 // find the smallest element

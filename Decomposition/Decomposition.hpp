@@ -30,9 +30,10 @@ void Decomposition(
         const auto Pl = std::get<1>(coor_tuple);
         const auto Pm = std::get<2>(coor_tuple);
 
-        std::cout << "Pk: " << Pk << std::endl;
-        std::cout << "Pl: " << Pl << std::endl;
-        std::cout << "Pm: " << Pm << std::endl;
+
+//        std::cout << "Pk: " << Pk << std::endl;
+//        std::cout << "Pl: " << Pl << std::endl;
+//        std::cout << "Pm: " << Pm << std::endl;
 
         Coor<T> Upl(Pk.getX(), Pm.getY()), Upr(Pl.getX(), Pm.getY());
 
@@ -49,10 +50,10 @@ void Decomposition(
         Polygon<T> poly_complement;
         Edge_list_complement(poly_copy, Rectangle, poly_complement);
 
-        std::cout << "poly_complement: " << std::endl;
-        for(auto v: poly_complement.vertexes){
-            std::cout << v << std::endl;
-        }
+//        std::cout << "poly_complement: " << std::endl;
+//        for(auto v: poly_complement.vertexes){
+//            std::cout << v << std::endl;
+//        }
 
         // copy poly_complement to poly_copy
         poly_copy.vertexes = poly_complement.vertexes;
@@ -72,7 +73,7 @@ void Decomposition(
 
 
 template <typename T>
-static auto findCoorTuple_Refactor(Polygon<T>& polxygon)
+static auto findCoorTuple_Refactor(Polygon<T>& polygon)
     -> std::tuple<Coor<T>, Coor<T>, Coor<T>>
 {   
     Polygon<T> poly_copy = polygon;

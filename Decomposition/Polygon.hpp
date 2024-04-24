@@ -339,10 +339,10 @@ void Edge_list_complement(
     }
     polygon_complement.vertexes_init();
 
-    std::cout << "Before shrink, polygon_complement is " << std::endl;
-    for(auto v : polygon_complement.vertexes){
-        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
-    }
+//    std::cout << "Before shrink, polygon_complement is " << std::endl;
+//    for(auto v : polygon_complement.vertexes){
+//        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+//    }
 
    /**********************************************************************************
      * complement edges step 2: remove redundancy_edge
@@ -356,11 +356,11 @@ void Edge_list_complement(
     while(redundancy){
         redundancy = Polygon_shrink_redundancy_edge(polygon_complement, poly_shrink);
 
-        std::cout << "Just for debug" << std::endl;
-        std::cout << "redunancy is " << redundancy << std::endl;
-        for(auto v : poly_shrink.vertexes){
-            std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
-        }
+//        std::cout << "Just for debug" << std::endl;
+//        std::cout << "redunancy is " << redundancy << std::endl;
+//        for(auto v : poly_shrink.vertexes){
+//            std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+//        }
 
 
         if(poly_shrink.vertexes.size() == 1){
@@ -373,10 +373,10 @@ void Edge_list_complement(
         }
     }
 
-    std::cout << "After shrink, polygon_complement is " << std::endl;
-    for(auto v : poly_shrink.vertexes){
-        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
-    }
+//    std::cout << "After shrink, polygon_complement is " << std::endl;
+//    for(auto v : poly_shrink.vertexes){
+//        std::cout << "(" << v.getX() << ", " << v.getY() << ")" << std::endl;
+//    }
 
     // Copy poly_shrink to polygon_complement
     polygon_complement.vertexes = poly_shrink.vertexes;

@@ -4,7 +4,9 @@ according Polygon.txt ploy polygon
 import matplotlib.pyplot as plt
 
 # 读取文件
-with open('Polygon.txt', 'r') as file:
+#with open('Polygon.txt', 'r') as file:
+#with open('Edge_1.txt', 'r') as file:
+with open('Edge.txt', 'r') as file:
     lines = file.readlines()
 
 edges = []
@@ -19,5 +21,14 @@ for line in lines:
 fig, ax = plt.subplots()
 for edge in edges:
     ax.plot([edge[0][0], edge[1][0]], [edge[0][1], edge[1][1]], color='black')
-    
+
+# collect all points
+points = []
+for edge in edges:
+    points.append(edge[0])
+    points.append(edge[1])
+# plot all points
+for point in points:
+    ax.plot(point[0], point[1], 'ro')
+
 plt.show()
