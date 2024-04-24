@@ -7,8 +7,9 @@
 #include <algorithm> 
 
 #define OVERLAP_Full    0
-#define OVERLAP_Partial 1
-#define OVERLAP_None    2
+#define OVERLAP_SPLIT   1
+#define OVERLAP_Partial 2
+#define OVERLAP_None    3
 
 template <typename T>
 struct edge
@@ -32,23 +33,31 @@ int after_overlapped(edge<T>& e1, edge<T>& e2){
             std::swap(e2.Coor_pair.first, e2.Coor_pair.second);
         }
         //check if e1 and e2 overlap
-        if(e1.Coor_pair.second.getX() < e2.Coor_pair.first.getX() || 
-            e2.Coor_pair.second.getX() < e1.Coor_pair.first.getX()){
+        if(e1.Coor_pair.second.getX() <= e2.Coor_pair.first.getX() || 
+            e2.Coor_pair.second.getX() <= e1.Coor_pair.first.getX()){
             //do nothing
             return OVERLAP_None;
         }
         else{
             // if e1 and e2 overlap, remove the overlapped part
+            
+            int flag;
+            //check if e1 and e2 are same
+            if(e1.Coor_pair.first == e2.Coor_pair.first && e1.Coor_pair.second == e2.Coor_pair.second){
+                flag = OVERLAP_Full;
+            }
+            //check if e2 is the subset of e1
+            else if(e2.Coor_pair.first.getX() >= e1.Coor_pair.first.getX() && e2.Coor_pair.second.getX() <= e1.Coor_pair.second.getX()){
+                flag = OVERLAP_SPLIT;
+            }
+            else{
+                flag = OVERLAP_Partial;
+            }
             Coor<T> tmp = e1.Coor_pair.second;
             e1.Coor_pair.second = e2.Coor_pair.first;
             e2.Coor_pair.first = tmp;
 
-            if(e1.Coor_pair.first == e1.Coor_pair.second){
-                return OVERLAP_Full;
-            }
-            else{
-                return OVERLAP_Partial;
-            }
+            return flag;
         }
     }
     // if e1, e2 are vertical edges
@@ -69,16 +78,24 @@ int after_overlapped(edge<T>& e1, edge<T>& e2){
         }
         else{
             // if e1 and e2 overlap, remove the overlapped part
+            int flag;
+            //check if e1 and e2 are same
+            if(e1.Coor_pair.first == e2.Coor_pair.first && e1.Coor_pair.second == e2.Coor_pair.second){
+                flag = OVERLAP_Full;
+            }
+            //check if e2 is the subset of e1
+            else if(e2.Coor_pair.first.getY() >= e1.Coor_pair.first.getY() && e2.Coor_pair.second.getY() <= e1.Coor_pair.second.getY()){
+                flag = OVERLAP_SPLIT;
+            }
+            else{
+                flag = OVERLAP_Partial;
+            }
+
             Coor<T> tmp = e1.Coor_pair.second;
             e1.Coor_pair.second = e2.Coor_pair.first;
             e2.Coor_pair.first = tmp;
 
-            if(e1.Coor_pair.first == e1.Coor_pair.second){
-                return OVERLAP_Full;
-            }
-            else{
-                return OVERLAP_Partial;
-            }
+            return flag;
         }
     }
 }
@@ -104,6 +121,14 @@ void edge_list_edge_complement(std::vector< edge<T> >& edge_list,
             // add the remaining part of e1 into the edge_list
             edge_list.push_back(e1);
         }
+        else if(flag == OVERLAP_SPLIT){
+            //check if iter is a point
+            if(iter->Coor_pair.first == iter->Coor_pair.second){
+                *iter = e2;
+            }
+            break;
+        }
+        // wait to modify
         else if(iter == edge_list.end() && flag == OVERLAP_None){
             // add the e2 into the edge_list
             edge_list.push_back(e2);
@@ -112,6 +137,8 @@ void edge_list_edge_complement(std::vector< edge<T> >& edge_list,
             ++iter;
         }
     }
+
+    // remove the redundant vertices
 }
 
 template <typename T>
