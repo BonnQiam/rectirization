@@ -104,7 +104,7 @@ int after_overlapped(edge<T>& e1, edge<T>& e2){
             return flag;
         }
     }
-    // if e1, e2 are vertical edges with sanme X
+    // if e1, e2 are vertical edges with same X
     else if(e1.Coor_pair.first.getX() == e1.Coor_pair.second.getX() && 
         e2.Coor_pair.first.getX() == e2.Coor_pair.second.getX()
         && e1.Coor_pair.first.getX() == e2.Coor_pair.first.getX()){
@@ -157,8 +157,13 @@ template <typename T>
 void edge_list_edge_complement(std::vector< edge<T> >& edge_list, 
                     edge<T> e2, int sort_type)
 {
+    if(edge_list.size() == 0){
+        edge_list.push_back(e2);
+        return;
+    }
+
     edges_sort<T>(edge_list, sort_type);
-    // If the e2 overlap with some edges of edge_list, the overlapped parts of these edges should be removed, and the remaining parts (not exist in the edge_list) of e2 should be added into the edge_list.
+    //  
     std::vector< edge<T> > add_edges;
     for(auto iter = edge_list.begin(); iter != edge_list.end();)
     {
@@ -169,6 +174,12 @@ void edge_list_edge_complement(std::vector< edge<T> >& edge_list,
             iter = edge_list.erase(iter);
             continue;
         }
+
+        // check if e2 is a point
+        if(e2.Coor_pair.first == e2.Coor_pair.second){
+            break;
+        }
+
 #if 0
         std::cout << "--------------------------------" << std::endl;
         std::cout << "e1 is " << e1.Coor_pair.first << " " << e1.Coor_pair.second << std::endl;
@@ -257,6 +268,14 @@ void edge_list_edge_complement(std::vector< edge<T> >& edge_list,
 
     // add the add_edges into the edge_list
     edge_list.insert(edge_list.end(), add_edges.begin(), add_edges.end());
+
+#if 0
+    // display the add_edges
+    for(auto& e : add_edges){
+        std::cout << "add_edges: " << e.Coor_pair.first << " " << e.Coor_pair.second << std::endl;
+    }
+#endif
+
 }
 
 template <typename T>
@@ -267,6 +286,20 @@ struct Polygon_edge_collection
 
     void edges_sort(int sort_type);
     void edges_2_vertices();
+    void vertices_2_edges();
+
+    //constructor
+    Polygon_edge_collection(std::vector< Coor<T> >& Polygon_vertices)
+    {
+        // move Polygon_vertices to vertices
+        vertices.assign(Polygon_vertices.begin(), Polygon_vertices.end());
+    }
+
+    Polygon_edge_collection(std::vector< edge<T> >& Polygon_edges)
+    {
+        // move Polygon_edges to edges
+        edges.assign(Polygon_edges.begin(), Polygon_edges.end());
+    }
 };
 
 template <typename T>
@@ -281,6 +314,20 @@ void Polygon_edge_collection<T>::edges_2_vertices()
 
     // remove the duplicate vertices
     vertices.erase(std::unique(vertices.begin(), vertices.end()), vertices.end());
+}
+
+template <typename T>
+void Polygon_edge_collection<T>::vertices_2_edges()
+{
+    edges.clear();
+    for(auto iter = vertices.begin(); iter != vertices.end(); iter++)
+    {
+        if(std::next(iter) == vertices.end()){
+            edges.push_back(edge<T>(*iter, vertices.front()));
+            break;
+        }
+        edges.push_back(edge<T>(*iter, *std::next(iter)));
+    }
 }
 
 #endif

@@ -115,7 +115,10 @@ void test_Edge_based_decomposition(){
 #endif
 
     std::cout << "Edge_based_decomposition Result:\n" << std::endl;
-    Edge_based_decomposition(polygon.begin(), polygon.end(), result);
+
+    Polygon_edge_collection<int> collection(polygon);
+
+    Edge_based_decomposition(collection, result);
 //    std::cout << "rectangle list:\n";
     std::ofstream outfile("Rectangle.txt");
     //clear the file

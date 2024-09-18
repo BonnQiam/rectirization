@@ -4,6 +4,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <iterator>
+
+#include <iterator>
+#include <type_traits>
 
 #include <vector>
 #include <tuple>
@@ -25,20 +29,17 @@ static auto findCoorTuple_Y(std::vector< Coor<T> >& vertices) // if not using th
                     typename std::vector< Coor<T> >::iterator>;
 
 
-template <typename T, typename const_iterator>
-void Edge_based_decomposition(const const_iterator& first, const const_iterator& last, 
-                    std::vector< Rect<T> >& result)
+template <typename T>
+void Edge_based_decomposition(Polygon_edge_collection<T>& Polygon_edges, std::vector< Rect<T> >& result)
 {
     result.clear();
-    std::vector< Coor<T> > polygon(first, last);
-    //establish the Polygon_edge_collection
-    Polygon_edge_collection<T> Polygon_edges;
-    for(auto it = polygon.begin(); it != polygon.end(); it++)
-    {
-        auto next = (std::next(it) == polygon.end()) ? polygon.begin() : std::next(it);
-        Polygon_edges.edges.push_back(edge<T>(*it, *next));
+
+    if(Polygon_edges.edges.size() == 0){
+        Polygon_edges.vertices_2_edges();
     }
-    Polygon_edges.edges_2_vertices();
+    else if(Polygon_edges.vertices.size() == 0){
+        Polygon_edges.edges_2_vertices();
+    }
 
 #if 0
     //display the edges
@@ -50,7 +51,7 @@ void Edge_based_decomposition(const const_iterator& first, const const_iterator&
 #endif
 
     while (Polygon_edges.edges.size()>1)
-    //for(int i=0; i<1; ++i)
+    //for(int i=0; i<4; ++i)
     //for(int i=0; i<500; ++i)
     {
         const auto& coor_tuple_X = findCoorTuple_X(Polygon_edges.vertices);
@@ -97,6 +98,8 @@ void Edge_based_decomposition(const const_iterator& first, const const_iterator&
         // edges of the rectangle
         edge<T> e1(Pk, upl), e2(upl, upr), e3(upr, Pl), e4(Pl, Pk);
         // add to the Polygon_edges.edges
+
+//        std::cout << "Flag: " << Flag << std::endl;
 
         if(Flag == 0){
             edge_list_edge_complement<T>(Polygon_edges.edges, e1, VERTICAL);

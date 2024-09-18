@@ -4,9 +4,9 @@ according Polygon.txt ploy polygon
 import matplotlib.pyplot as plt
 
 # 读取文件
-#with open('Polygon.txt', 'r') as file:
+with open('Polygon.txt', 'r') as file:
 #with open('Edge_1.txt', 'r') as file:
-with open('Edge.txt', 'r') as file:
+#with open('Edge.txt', 'r') as file:
     lines = file.readlines()
 
 edges = []

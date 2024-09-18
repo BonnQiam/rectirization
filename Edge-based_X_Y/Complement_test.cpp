@@ -8,8 +8,8 @@ void test_findCoorTuple();
 
 int main(){
     //test_after_overlapped();
-    //test_edge_list_edge_complement();
-    test_findCoorTuple();
+    test_edge_list_edge_complement();
+    //test_findCoorTuple();
 
     return 0;
 }
@@ -80,14 +80,14 @@ void test_edge_list_edge_complement()
 
     edge<int> e1(Coor<int>(1, 3), Coor<int>(2, 3));
     edge_list.push_back(e1);
-    edge<int> e2(Coor<int>(4, 3), Coor<int>(5, 3));
+    edge<int> e2(Coor<int>(9, 3), Coor<int>(12, 3));
     edge_list.push_back(e2);
     //edge<int> e3(Coor<int>(0, 4), Coor<int>(0, 5));
     //edge_list.push_back(e3);
     //edge<int> e4(Coor<int>(3, 0), Coor<int>(4, 0));
     //edge_list.push_back(e4);
 
-    edge<int> e_test(Coor<int>(2, 3), Coor<int>(4, 3));
+    edge<int> e_test(Coor<int>(0, 3), Coor<int>(2, 3));
 
 //    edge_list_edge_complement<int>(edge_list, e_test, VERTICAL);
     edge_list_edge_complement<int>(edge_list, e_test, HORIZONTAL);
